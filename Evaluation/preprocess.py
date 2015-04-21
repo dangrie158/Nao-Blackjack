@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import tkSimpleDialog
 
 cap = cv2.VideoCapture(0)
 
@@ -37,9 +38,14 @@ def getCards(contours, im):
 			warp = cv2.warpPerspective(im,transform,(450,450))
 			yield warp
 
+def saveCard(img):
+	cardName = raw_input("Enter Card Name: \n\t")
+	cv2.imwrite(cardName + '.png', img);
+
 while(True):
     # Capture frame-by-frame
     ret, frame = cap.read()
+    
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     contours = getContours(gray)
@@ -48,6 +54,9 @@ while(True):
 
     for card in getCards(contours, gray):
     	cv2.imshow("getCards", card)
+
+    if cv2.waitKey(1) & 0xFF == ord('s'):
+        saveCard(card)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
