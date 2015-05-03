@@ -58,10 +58,10 @@ def imageRerverseProjection(rectangle, im):
 	return warp
 
 # Crops a given image to a given percentage
-def cropPercentage(im, percent = 18):
+def cropPercentage(im, fromPoint, toPoint):
 	xSize = im.shape[0]
-	ySize = im.shape[0]
-	return im[0:(xSize/100*percent), 0:(ySize/100*percent)]
+	ySize = im.shape[1]
+	return im[xSize/100*fromPoint[0]:xSize/100*toPoint[0], ySize/100*fromPoint[1]:ySize/100*toPoint[1]]
 
 # Rotate a given Image
 def rotateImage(im, imSize, angle = 90):
@@ -82,3 +82,21 @@ def getBoundingBox(rect):
 	p1 = (xMin, yMin)
 	p2 = (xMax, yMax)
 	return p1, p2
+
+def polygonCentroid(poly):
+	#the formula from http://en.wikipedia.org/wiki/Centroid#Centroid_of_polygon
+	#the signed area:
+	a = 0.0
+	cx = 0.0
+	cy = 0.0
+	for i in range(0, len(poly)):
+		i1 = (i + 1) % len(poly)
+		asum = poly[i][0] * poly[i1][1] - poly[i1][0] * poly[i][1]
+		cx += (poly[i][0] + poly[i1][0]) * asum
+		cy += (poly[i][1] + poly[i1][1]) * asum
+		a += asum
+
+	a *= 0.5
+	cx /= (6 * a)
+	cy /= (6 * a)
+	return (int(cx), int(cy))

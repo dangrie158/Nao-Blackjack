@@ -1,5 +1,6 @@
 import cv2
 import HelperFunctions as hf
+from Card import Card
 
 MAX_NUMCARDS = 15
 
@@ -22,16 +23,14 @@ def getContours(im):
 	return contours
 
 def getCards(frame, epsilon=10000):
-	cardImages = []
-	positions = []
+	cards = []
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	edges = cv2.Canny(gray,100,200)
+
 	contours = getContours(edges)
 	for c in contours:
 		rect = hf.rectify(c)
 		if rect is not None and cv2.contourArea(c) >= epsilon:
-			positions.append(rect)
 			cardImg = hf.imageRerverseProjection(rect, gray)
-			cardImages.append(cardImg)
-	return cardImages, positions
-	
+			cards.append(Card(cardImg, rect))
+	return cards

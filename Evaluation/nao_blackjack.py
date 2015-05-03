@@ -1,49 +1,64 @@
 import cv2
-from math import ceil
-import numpy as np
 import CardDetection as cd
 import HelperFunctions as hf
+from VirtualTable import VirtualTable
+from Player import Player
 
 #TRAINSET = "trainingsset/"
 DRAW_ONLY_VALUES = False
 cap = cv2.VideoCapture(0)
 
 # Draws given bounding boxes onto a image
-def drawBoundingBoxes(frame, rect):
-	for r in rect:
-		p1, p2 = hf.getBoundingBox(r)
+def drawBoundingBoxes(frame, cards):
+	for card in cards:
+		p1, p2 = hf.getBoundingBox(card.getBoundingBox())
 		cv2.rectangle(frame, p1, p2, (0,0,255), 3)
 
-# Show Thumbnails of detected cards
-def drawCardThumbnails(windowTitle, cards, cardWidth = 70, cardHeight = 100, margin = 20, cardPerRow = 5.0):
-	i, y = [0, 0]
-	cardCount = len(cards)
-	if cardCount > 0:
-		tableWidth  = cardPerRow * (cardWidth + margin)
-		tableHeight = (ceil(cardCount / cardPerRow)) * (cardHeight + margin)
-		table = np.zeros((tableHeight, tableWidth), dtype = np.uint8)
-		for card in cards:
-			cardThumbnail = cv2.resize(card, (cardWidth, cardHeight))
-			if DRAW_ONLY_VALUES:
-				cardThumbnail = hf.cropPercentage(cardThumbnail)
-			if i*(cardWidth + margin) + cardThumbnail.shape[1] > table.shape[1]:
-				y = y + 1
-				i = 0
-			table[y*(cardHeight+margin):y*(cardHeight+margin)+cardThumbnail.shape[0], i*(cardWidth+margin):i*(cardWidth+margin)+cardThumbnail.shape[1]] = cardThumbnail
-			i = i + 1
-		cv2.imshow(windowTitle, table)
+def drawCenteroids(frame, cards):
+	for card in cards:
+		cv2.circle(frame, card.getCenteroidInFrame(), 10, (0,255,0))
+
+def drawCenter(frame):
+	p1 = (0, frame.shape[0] / 2)
+	p2 = (frame.shape[1], frame.shape[0] / 2)
+	cv2.line(frame, p1, p2, (255,0,255))
+
+def divideOutCards(cards, player1, player2, threshold):
+	for card in cards:
+		if card.getCenteroidInFrame()[1] < centerY:
+			player1.addCard(cards)
+		else:
+			player2.addCard(cards)
+
 
 
 # main execution method
 if __name__ == '__main__':
 
+	table = VirtualTable("Game Table")
+	player1 = Player()
+	player2 = Player()
+	
+	table.setPlayer1(player1)
+	table.setPlayer2(player2)
+
 	while(True):
 	    # Capture frame-by-frame
 	    ret, frame = cap.read()
-	    images, positions = cd.getCards(frame)
-	    drawCardThumbnails("Detected Cards", images)
-	    drawBoundingBoxes(frame, positions)
-	    cv2.imshow("Table", frame)
+	    cards = cd.getCards(frame)
+	    centerY = frame.shape[0] / 2
+
+	    divideOutCards(cards, player1, player2, centerY)
+
+	    table.render()
+
+	    drawBoundingBoxes(frame, cards)
+	    drawCenteroids(frame, cards)
+	    drawCenter(frame)
+	    cv2.imshow("Capture", frame)
+
+	    player1.reset()
+	    player2.reset()
 	  
 	    if cv2.waitKey(1) & 0xFF == ord('q'):
 	        break
