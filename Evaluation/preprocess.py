@@ -7,6 +7,7 @@ TRAINSET = "trainingsset/"
 
 cap = cv2.VideoCapture(0)
 
+
 def loadCards(path):
 	cardPaths = os.listdir(path)
 	trainset = {}
