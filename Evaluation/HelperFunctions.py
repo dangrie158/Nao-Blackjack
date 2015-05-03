@@ -54,7 +54,7 @@ def imageRerverseProjection(rectangle, im):
 	warp = cv2.warpPerspective(im,transform,(450,450))
 	# Rotate if necessary
 	if euclidDist(rectangle[0], rectangle[1]) > euclidDist(rectangle[1], rectangle[2]):
-		warp = rotateCard(warp, 450)
+		warp = rotateImage(warp, 450)
 	return warp
 
 # Crops a given image to a given percentage
