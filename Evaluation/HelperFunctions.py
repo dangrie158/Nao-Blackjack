@@ -44,7 +44,7 @@ def rectify(contour):
 
 # returns the euclidian Distance between two 2D points
 def euclidDist(p1, p2):
-	return math.sqrt(math.pow(p2[0] - p1[0], 2) + math.pow(p2[1] - p1[1], 2))
+	return math.hypot(p2[0] - p1[0], p2[1] - p1[1])
 
 # Crops a given image to fit in a given rectangle
 def imageRerverseProjection(rectangle, im):  
@@ -81,7 +81,7 @@ def boundingBox(rect):
 		if p[1] > yMax: yMax = p[1]
 	p1 = (xMin, yMin)
 	p2 = (xMax, yMax)
-	return p1, p2
+	return correctRectangleRotation((p1, p2))
 
 #calculate the centroid of any CCW directed, non self intersecting polygon
 def polygonCentroid(poly):
@@ -96,11 +96,22 @@ def polygonCentroid(poly):
 		cx += (poly[i][0] + poly[i1][0]) * asum
 		cy += (poly[i][1] + poly[i1][1]) * asum
 		a += asum
-
 	a *= 0.5
-	cx /= (6 * a)
-	cy /= (6 * a)
-	return (int(cx), int(cy))
+
+	if math.isnan(cx) or cx == 0:
+		cx = 0
+	else:
+		cx /= (6 * a)
+		cx = int(cx)
+
+	if math.isnan(cy) or cy == 0:
+		cy = 0
+	else:
+		cy /= (6 * a)
+		cy = int(cy)
+
+	return (cx, cy)
+	return None
 
 #correct a polygon rotation, so that the first point is in the upper left, 
 #and the second point in the lower right corner
@@ -123,4 +134,4 @@ def rectangeIntersectionArea(rect1, rect2):
 	#based on http://stackexchange.com/questions/99565/simplest-way-to-calculate-the-intersect-area-of-two-rectangles
 	xOverlap = max(0, max(rect1[1][0],rect2[1][0]) - min(rect1[0][0],rect2[0][0]));
   	yOverlap = max(0, max(rect1[1][1],rect2[1][1]) - min(rect1[0][1],rect2[0][1]));
-  	return xOverlap * yOverlap;
+  	return xOverlap, yOverlap;

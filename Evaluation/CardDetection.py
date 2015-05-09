@@ -18,7 +18,7 @@ def returnDirectDiffImage(trainingSet, img):
 
 # Returns contours of a Image
 def getContours(im):
-	contours, hierarchy = cv2.findContours(im,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+	contours, hierarchy = cv2.findContours(im,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
 	contours = sorted(contours, key=cv2.contourArea,reverse=True)[:MAX_NUMCARDS * 2]
 	return contours
 
@@ -32,10 +32,9 @@ def getCards(frame, minArea=10000):
 		rect = hf.rectify(c)
 		if rect is not None and cv2.contourArea(c) >= minArea:
 			cardImg = hf.imageRerverseProjection(rect, gray)
-
 			cardCandidate = Card(cardImg, rect)
-			#detect possible duplicates of the detected card already in the list
-			if not any(cardCandidate.hasSameBoundingBoxAs(card) for card in cards):
-				cards.append(cardCandidate)
 
+			#detect possible duplicates of the detected card already in the list
+			if not any(cardCandidate.overlaps(card) for card in cards):
+				cards.append(cardCandidate)
 	return cards

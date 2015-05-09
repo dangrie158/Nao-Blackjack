@@ -5,14 +5,18 @@ from VirtualTable import VirtualTable
 from Player import Player
 
 #TRAINSET = "trainingsset/"
-DRAW_ONLY_VALUES = False
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 # Draws given bounding boxes onto a image
 def drawBoundingBoxes(frame, cards):
 	for card in cards:
-		p1, p2 = hf.boundingBox(card.getBoundingBox())
+		p1, p2 = card.getBoundingBox()
 		cv2.rectangle(frame, p1, p2, (0,0,255), 3)
+
+# Draws given bounding boxes onto a image
+def drawIntersectingBoundingBoxes(frame, card1, card2):
+	p1, p2 = card1.getIntersectingBoundingBox(card2)
+	cv2.rectangle(frame, p1, p2, (0,255,255), 3)
 
 def drawCenteroids(frame, cards):
 	for card in cards:
@@ -26,9 +30,9 @@ def drawCenter(frame):
 def divideOutCards(cards, player1, player2, threshold):
 	for card in cards:
 		if card.getCenteroidInFrame()[1] < centerY:
-			player1.addCard(cards)
+			player1.addCard(card)
 		else:
-			player2.addCard(cards)
+			player2.addCard(card)
 
 # main execution method
 if __name__ == '__main__':
@@ -47,10 +51,10 @@ if __name__ == '__main__':
 	    centerY = frame.shape[0] / 2
 
 	    divideOutCards(cards, player1, player2, centerY)
-
 	    table.render()
 
 	    drawBoundingBoxes(frame, cards)
+
 	    drawCenteroids(frame, cards)
 	    drawCenter(frame)
 	    cv2.imshow("Capture", frame)

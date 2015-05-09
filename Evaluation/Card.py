@@ -23,14 +23,27 @@ class Card:
 	def getRectangleInFrame(self):
 		return self.frameRectangle
 
+	def getWidth(self):
+		p1, p2 = self.getBoundingBox()
+		return p2[0] - p1[0]
+
+	def getHeight(self):
+		p1, p2 = self.getBoundingBox()
+		return p2[1] - p1[1]
+
 	def getCenteroidInFrame(self):
 		return hf.polygonCentroid(self.frameRectangle)
 
-	def intersectingBoundingBox(self, other):
+	def getIntersectingBoundingBox(self, other):
 		return hf.rectangeIntersectionArea(self.getBoundingBox(), other.getBoundingBox())
 
+	def overlaps(self, other):
+		p1, p2 = self.getBoundingBox()
+		p3, p4 = other.getBoundingBox()
+		return hf.euclidDist(p1, p3) <= self.getWidth() or hf.euclidDist(p2, p4) <= self.getWidth()
+
 	def hasSameBoundingBoxAs(self, other, proximity = 0.6):
-		intersectionArea = self.intersectingBoundingBox(other)
+		intersectionArea = self.getIntersectingBoundingBox(other)
 		if intersectionArea > 0:
 			ownArea = hf.rectangleArea(self.getBoundingBox())
 			absoluteRatio = ownArea / intersectionArea
