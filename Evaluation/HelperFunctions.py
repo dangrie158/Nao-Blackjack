@@ -71,7 +71,7 @@ def rotateImage(im, imSize, angle = 90):
 	return result
 
 # Returns the bounding box of a rectangle
-def getBoundingBox(rect):
+def boundingBox(rect):
 	xMin, yMin, = [maxint, maxint]
 	xMax, yMax = [0, 0]
 	for p in rect:
@@ -83,6 +83,7 @@ def getBoundingBox(rect):
 	p2 = (xMax, yMax)
 	return p1, p2
 
+#calculate the centroid of any CCW directed, non self intersecting polygon
 def polygonCentroid(poly):
 	#the formula from http://en.wikipedia.org/wiki/Centroid#Centroid_of_polygon
 	#the signed area:
@@ -100,3 +101,26 @@ def polygonCentroid(poly):
 	cx /= (6 * a)
 	cy /= (6 * a)
 	return (int(cx), int(cy))
+
+#correct a polygon rotation, so that the first point is in the upper left, 
+#and the second point in the lower right corner
+def correctRectangleRotation(rect):
+	newP1 = (min(rect[0][0], rect[1][0]), min(rect[0][1], rect[1][1]))
+	newP2 = (max(rect[0][0], rect[1][0]), max(rect[0][1], rect[1][1]))
+	return (newP1, newP2)
+
+def rectangleArea(rect):
+	xDistance = max(rect[0][0], rect[1][0]) - min(rect[0][0], rect[1][0])
+	yDistance = max(rect[0][1], rect[1][1]) - min(rect[0][1], rect[1][1])
+	return xDistance * yDistance
+
+def rectangeIntersectionArea(rect1, rect2):
+	#simple min/max version that only works on non rotated polygons
+	#so we need to rotate the polygons first if neccecary
+	rect1 = correctRectangleRotation(rect1);
+	rect2 = correctRectangleRotation(rect2);
+
+	#based on http://stackexchange.com/questions/99565/simplest-way-to-calculate-the-intersect-area-of-two-rectangles
+	xOverlap = max(0, max(rect1[1][0],rect2[1][0]) - min(rect1[0][0],rect2[0][0]));
+  	yOverlap = max(0, max(rect1[1][1],rect2[1][1]) - min(rect1[0][1],rect2[0][1]));
+  	return xOverlap * yOverlap;

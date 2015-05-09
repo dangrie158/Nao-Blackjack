@@ -6,12 +6,12 @@ from Player import Player
 
 #TRAINSET = "trainingsset/"
 DRAW_ONLY_VALUES = False
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 # Draws given bounding boxes onto a image
 def drawBoundingBoxes(frame, cards):
 	for card in cards:
-		p1, p2 = hf.getBoundingBox(card.getBoundingBox())
+		p1, p2 = hf.boundingBox(card.getBoundingBox())
 		cv2.rectangle(frame, p1, p2, (0,0,255), 3)
 
 def drawCenteroids(frame, cards):
@@ -29,8 +29,6 @@ def divideOutCards(cards, player1, player2, threshold):
 			player1.addCard(cards)
 		else:
 			player2.addCard(cards)
-
-
 
 # main execution method
 if __name__ == '__main__':

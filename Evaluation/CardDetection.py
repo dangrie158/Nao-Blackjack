@@ -22,7 +22,7 @@ def getContours(im):
 	contours = sorted(contours, key=cv2.contourArea,reverse=True)[:MAX_NUMCARDS * 2]
 	return contours
 
-def getCards(frame, epsilon=10000):
+def getCards(frame, minArea=10000):
 	cards = []
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	edges = cv2.Canny(gray,100,200)
@@ -30,7 +30,12 @@ def getCards(frame, epsilon=10000):
 	contours = getContours(edges)
 	for c in contours:
 		rect = hf.rectify(c)
-		if rect is not None and cv2.contourArea(c) >= epsilon:
+		if rect is not None and cv2.contourArea(c) >= minArea:
 			cardImg = hf.imageRerverseProjection(rect, gray)
-			cards.append(Card(cardImg, rect))
+
+			cardCandidate = Card(cardImg, rect)
+			#detect possible duplicates of the detected card already in the list
+			if not any(cardCandidate.hasSameBoundingBoxAs(card) for card in cards):
+				cards.append(cardCandidate)
+
 	return cards
