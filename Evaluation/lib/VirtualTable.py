@@ -18,7 +18,7 @@ class VirtualTable:
 
 		for card in cards:
 			#cardThumbnail = card.getThumbnail((cardWidth, cardHeight))
-			cardThumbnail = card.getValue()
+			cardThumbnail = card.getValueImage()
 			#check where (x) the new card should go
 			nextX = start[0] + dx * (cardWidth + margin)
 			nextY = start[1] + dy * (cardHeight + margin)
