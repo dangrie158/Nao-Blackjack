@@ -1,8 +1,8 @@
+import lib.CardDetection as cd
+import lib.HelperFunctions as hf
+from lib.VirtualTable import VirtualTable
+from lib.Player import Player
 import cv2
-import CardDetection as cd
-import HelperFunctions as hf
-from VirtualTable import VirtualTable
-from Player import Player
 
 #TRAINSET = "trainingsset/"
 cap = cv2.VideoCapture(0)

@@ -7,9 +7,27 @@ VALUE_SIZE = (15, 20)
 VALUE_OFFSET = (5,5)
 
 class Card:
+
+	class Value:
+		two = 2
+		three = 3
+		four = 4
+		five = 5
+		six = 6
+		seven = 7
+		eight = 8
+		nine = 9
+		ten = 10
+		jack = 10
+		queen = 10
+		king = 10
+		ace = -1
+		undefined = -2
+
 	def __init__(self, imageData, rect):
 		self.image = imageData
 		self.frameRectangle = rect
+		self.value = Value.undefined
 
 	def getValue(self):
 		return hf.cropPercentage(self.image, (VALUE_OFFSET), tuple(map(operator.add, VALUE_SIZE, VALUE_OFFSET)))
