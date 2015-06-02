@@ -1,21 +1,22 @@
+from Card import Card
 from Card import Value
 import random
 class CardDeck:
 
 	def __init__(self):
-		self.cards = [	Value.Two, Value.Two, Value.Two, Value.Two,
-						Value.Three, Value.Three, Value.Three, Value.Three, 
-						Value.Four, Value.Four, Value.Four, Value.Four,
-						Value.Five, Value.Five, Value.Five, Value.Five,
-						Value.Six, Value.Six, Value.Six, Value.Six,
-						Value.Seven, Value.Seven, Value.Seven, Value.Seven,
-						Value.Eight, Value.Eight, Value.Eight, Value.Eight,
-						Value.Nine, Value.Nine, Value.Nine, Value.Nine,
-						Value.Ten, Value.Ten, Value.Ten, Value.Ten,
-						Value.Jack, Value.Jack, Value.Jack, Value.Jack,
-						Value.Queen, Value.Queen, Value.Queen, Value.Queen,
-						Value.King, Value.King, Value.King, Value.King,
-						Value.Ace, Value.Ace, Value.Ace, Value.Ace
+		self.cards = [	Card(None,  None, Value.Two), Card(None, None, Value.Two), Card(None, None, Value.Two), Card(None, None, Value.Two),
+						Card(None, None, Value.Three), Card(None, None, Value.Three), Card(None, None, Value.Three), Card(None, None, Value.Three), 
+						Card(None, None, Value.Four), Card(None, None, Value.Four), Card(None, None, Value.Four), Card(None, None, Value.Four),
+						Card(None, None, Value.Five), Card(None, None, Value.Five), Card(None, None, Value.Five), Card(None, None, Value.Five),
+						Card(None, None, Value.Six), Card(None, None, Value.Six), Card(None, None, Value.Six), Card(None, None, Value.Six),
+						Card(None, None, Value.Seven), Card(None, None, Value.Seven), Card(None, None, Value.Seven), Card(None, None, Value.Seven),
+						Card(None, None, Value.Eight), Card(None, None, Value.Eight), Card(None, None, Value.Eight), Card(None, None, Value.Eight),
+						Card(None, None, Value.Nine), Card(None, None, Value.Nine), Card(None, None, Value.Nine), Card(None, None, Value.Nine),
+						Card(None, None, Value.Ten), Card(None, None, Value.Ten), Card(None, None, Value.Ten), Card(None, None, Value.Ten),
+						Card(None, None, Value.Jack), Card(None, None, Value.Jack), Card(None, None, Value.Jack), Card(None, None, Value.Jack),
+						Card(None, None, Value.Queen), Card(None, None, Value.Queen), Card(None, None, Value.Queen), Card(None, None, Value.Queen),
+						Card(None, None, Value.King), Card(None, None, Value.King), Card(None, None, Value.King), Card(None, None, Value.King),
+						Card(None, None, Value.Ace), Card(None, None, Value.Ace), Card(None, None, Value.Ace), Card(None, None, Value.Ace)
 					]
 
 	def shuffle(self):

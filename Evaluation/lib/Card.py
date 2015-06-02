@@ -7,28 +7,36 @@ import math
 VALUE_SIZE = (15, 20)
 VALUE_OFFSET = (5,5)
 
+#very easy wrapper class to map values to
+# the relative index in the case vector
 class Value:
-	Two = 0
-	Three = 1
-	Four = 2
-	Five = 3
-	Six = 4
-	Seven = 5
-	Eight = 6
-	Nine = 7
-	Ten = 8
-	Jack = 8
-	Queen = 8
-	King = 8
-	Ace = 9
-	Undefined = -1
+	def __init__(self, index, value):
+		self.index = index
+		self.value = value
 
+Value.Two = Value(0, 2)
+Value.Three = Value(1, 3)
+Value.Four = Value(2, 4)
+Value.Five = Value(3, 5)
+Value.Six = Value(4, 6)
+Value.Seven = Value(5, 7)
+Value.Eight = Value(6, 8)
+Value.Nine = Value(7, 9)
+Value.Ten = Value(8, 10)
+Value.Jack = Value(8, 10)
+Value.Queen = Value(8, 10)
+Value.King = Value(8, 10);
+Value.Ace = Value(9, 0)
+Value.Undefined = Value(-1, -1)
+
+#the representation af a card. this is both,
+#the imagedata from the camera and a value to calculate
+#the handvalue and the casevector
 class Card:
-
-	def __init__(self, imageData, rect):
+	def __init__(self, imageData, rect, value = Value.Undefined):
 		self.image = imageData
 		self.frameRectangle = rect
-		self.value = Value.undefined
+		self.value = value
 
 	def getValueImage(self):
 		return hf.cropPercentage(self.image, (VALUE_OFFSET), tuple(map(operator.add, VALUE_SIZE, VALUE_OFFSET)))

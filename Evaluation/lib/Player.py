@@ -1,3 +1,5 @@
+import Card
+
 class Player:
 	def __init__(self):
 		self.cards = []
@@ -12,3 +14,18 @@ class Player:
 
 	def reset(self):
 		self.cards = []
+
+	def getHandValue(self):
+		value = 0
+			#first sum up everything except the aces
+		for card in self.cards:
+			if card.value != Card.Value.Ace:
+				value += card.value.value
+		#now do the aces and try not to get over 21
+		for card in self.cards:
+			if card.value == Card.Value.Ace:
+				if (value + 11) > 21:
+					value + 1
+				else:
+					value + 11
+		return value

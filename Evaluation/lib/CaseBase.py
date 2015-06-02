@@ -1,28 +1,51 @@
+import random
+from math import ceil
+
+class Case:
+	def __init__(self, vector, action = None):
+		self.vector = vector
+		self.action = action
+
+class Action:
+	Hit = 0
+	Stay = 1
+
+	@staticmethod
+	def getRandomAction():
+		rnd = ceil(random.random() * 2)
+		if rnd == 1:
+			return Action.Hit
+		elif rnd == 2:
+			return Action.Stay
+
+
 class CaseBase:
-	persistAfter = 10000
+	PERSIST_AFTER = 1000
 	def __init__(self):
 		self.cases = []
 
 	def putCase(self, case):
 		self.cases.append(case)
-		if(len(self.cases) > pasistAfter):
-			pass # TODO: persist casebase to file
+		if(len(self.cases) % CaseBase.PERSIST_AFTER) == 0:
+			print str(len(self.cases))  + " Games" # TODO: persist casebase to file
 
 	def getClosestCase(self, case):
 		for case in self.cases:
 			pass #TODO: add logic to get minimal distance
 
+		return 0.0, Case([0] * 30, Action.Stay)
+
 	@staticmethod
 	def createCase(deck, player, bank):
-		case = [0] * 30
+		caseVector = [0] * 30
 
 		for card in deck.cards:
-			case[card] += 1
+			caseVector[card.value.index] += 1
 
 		for card in player.cards:
-			case[card + 10] += 1
+			caseVector[card.value.index + 10] += 1
 
 		for card in bank.cards:
-			case[card + 20] += 1
+			caseVector[card.value.index + 20] += 1
 
-		return case
+		return Case(caseVector)
