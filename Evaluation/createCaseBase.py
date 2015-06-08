@@ -4,13 +4,13 @@ from lib.Player import Player
 from lib.CaseBase import CaseBase
 from lib.CaseBase import Action
 
-MAX_DISTANCE = 0 #TODO check value after a measure of distance is set
+MAX_DISTANCE = 1.5 #TODO check value after a measure of distance is set
 
 bank = Player()
 player = Player()
 
-winBase = CaseBase()
-lossBase = CaseBase()
+winBase = CaseBase("Win Base")
+lossBase = CaseBase("Loss Base")
 
 def performAction(action, player, deck):
 	if action == Action.Hit:
@@ -18,11 +18,12 @@ def performAction(action, player, deck):
 	elif action == Action.Stay:
 		pass #do nothing
 	else:
-		raise Exception('invalid action passed')
+		raise Exception('invalid action passed' + str(action))
+
+def getRandomActionForCase(case):
+	return True, Action.getRandomAction()
 
 def getBestActionForCase(case):
-
-	#TODO do we need some sanity checks (e.g. don't draw on 21, ...)
 
 	#get the best matches from each base
 	winDistance, winCase = winBase.getClosestCase(case)
@@ -45,13 +46,21 @@ def getBestActionForCase(case):
 			randomAction = Action.getRandomAction()
 			if randomAction != lossCase.action:
 				return True, randomAction
-		
+	raise Exception("Invalid Action returned")
 
-	return Action.Stay
+deck = CardDeck()
+deck.shuffle()
+lostGames = 1
+wonGames = 1
+playedGames = 0
+printGames = 1
+MAX_GAMES = 100000
 
 while True:
-	deck = CardDeck()
-	deck.shuffle()
+
+	if(deck.amount() < 14):
+		deck = CardDeck()
+		deck.shuffle()
 
 	#the bank gets the first card of the deck
 	bank.addCard(deck.pick())
@@ -68,23 +77,37 @@ while True:
 
 	#get the best action for the case and
 	#save the performed action to the case
-	currentCase.action, isRandom = getBestActionForCase(currentCase)
+	isRandom = False
+	if playedGames < MAX_GAMES:
+		isRandom, currentCase.action = getRandomActionForCase(currentCase)
+	else:
+		isRandom, currentCase.action = getBestActionForCase(currentCase)
 	
 	#save the case in an temporary array, because 
 	#we can't know yet if we need to put it in the
 	#winbase or lossbase. but onyl append random bases, or we 
 	#end up with a lot of duplicates in the base 
-	if not isRandom:
+	if isRandom:
 		casesInThisGame.append(currentCase)
 
 	while currentCase.action != Action.Stay:
 		performAction(currentCase.action, player, deck)
 		
-
 		#create a new case for the new situation
 		currentCase = CaseBase.createCase(deck, player, bank)
-		currentCase.action = getBestActionForCase(currentCase)
-		casesInThisGame.append(currentCase)
+
+		isfixedValue = False
+		isRandom = False
+		if player.getHandValue() >= 21:
+			currentCase.action = Action.Stay
+			isfixedValue = True
+		else:
+			if playedGames < MAX_GAMES:
+				isRandom, currentCase.action = getRandomActionForCase(currentCase)
+			else:
+				isRandom, currentCase.action = getBestActionForCase(currentCase)
+		if isRandom or isfixedValue:
+			casesInThisGame.append(currentCase)
 
 	
 	#after all players have drawn their cards, the bank
@@ -101,13 +124,18 @@ while True:
 	#check if we lost
 	if player.getHandValue() > 21 or (bank.getHandValue() <= 21 and bank.getHandValue() > player.getHandValue()):
 		[lossBase.putCase(case) for case in casesInThisGame]
-		#print "lost"
+		if playedGames % printGames == 0 and playedGames > MAX_GAMES:
+			lostGames+=1
+			print "Lost! Bank Value: " + str(bank.getHandValue()) + ", Player Value: " + str(player.getCards()) + " / " + str(player.getHandValue()) + ", Win to Lost: " + str(wonGames  * 1.0 / lostGames)		
 	#or won
 	else:
 		[winBase.putCase(case) for case in casesInThisGame]
-		#print "won"
+		if playedGames % printGames == 0 and playedGames > MAX_GAMES:
+			wonGames+=1
+			print "Win! Bank Value: " + str(bank.getHandValue()) + ", Player Value: " + str(player.getCards()) + " / " + str(player.getHandValue()) + ", Win to Lost: " + str(wonGames  * 1.0 / lostGames)
 
 	#print "-"*30
 
+	playedGames += 1
 	bank.reset()
 	player.reset()

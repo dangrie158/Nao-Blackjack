@@ -1,5 +1,7 @@
 import random
+from sys import maxint
 from math import ceil
+from scipy import spatial
 
 class Case:
 	def __init__(self, vector, action = None):
@@ -21,19 +23,38 @@ class Action:
 
 class CaseBase:
 	PERSIST_AFTER = 1000
-	def __init__(self):
+	def __init__(self, name):
 		self.cases = []
+		self.name = name
 
 	def putCase(self, case):
 		self.cases.append(case)
 		if(len(self.cases) % CaseBase.PERSIST_AFTER) == 0:
-			print str(len(self.cases))  + " Games" # TODO: persist casebase to file
+			print str(len(self.cases))  + " Games in " + self.name # TODO: persist casebase to file
+
 
 	def getClosestCase(self, case):
-		for case in self.cases:
-			pass #TODO: add logic to get minimal distance
+		nearestCase = Case([0] * 30, Action.Stay)
+		caseDistance = maxint
+		for compareCase in self.cases:
+			distance = self.getCosineDistance(compareCase.vector, case.vector)
+			#print("Distance: " + str(distance))
+			if distance < caseDistance:
+				nearestCase = compareCase
+				caseDistance = distance
+		return caseDistance, nearestCase
 
-		return 0.0, Case([0] * 30, Action.Stay)
+	def getOwnEuclidDistance(self, case1, case2):
+		sum = 0.0;
+		for i in range(len(case1.vector)):
+			sum += (case1.vector[i] - case2.vector[i])**2
+		return math.sqrt(sum)
+
+	def getEuclidDistance(self, case1, case2):
+		return spatial.distance.euclidean(case1, case2)
+
+	def getCosineDistance(self, case1, case2):
+		return spatial.distance.cosine(case1, case2)
 
 	@staticmethod
 	def createCase(deck, player, bank):

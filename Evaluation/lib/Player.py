@@ -25,7 +25,13 @@ class Player:
 		for card in self.cards:
 			if card.value == Card.Value.Ace:
 				if (value + 11) > 21:
-					value + 1
+					value += 1
 				else:
-					value + 11
+					value += 11
 		return value
+
+	def getCards(self):
+		cards = []
+		for card in self.cards:
+			cards.append(card.value.value)
+		return cards

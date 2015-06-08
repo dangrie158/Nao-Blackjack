@@ -24,3 +24,7 @@ class CardDeck:
 
 	def pick(self):
 		return self.cards.pop()
+
+	def amount(self):
+		return len(self.cards)
+
