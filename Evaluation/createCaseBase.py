@@ -3,14 +3,15 @@ from lib.Card import Value
 from lib.Player import Player
 from lib.CaseBase import CaseBase
 from lib.CaseBase import Action
+import lib.HelperFunctions as Helper
 
 MAX_DISTANCE = 1.5 #TODO check value after a measure of distance is set
 
 bank = Player()
 player = Player()
 
-winBase = CaseBase("Win Base")
-lossBase = CaseBase("Loss Base")
+winBase = CaseBase("Win_Base")
+lossBase = CaseBase("Loss_Base")
 
 def performAction(action, player, deck):
 	if action == Action.Hit:
@@ -55,6 +56,17 @@ wonGames = 1
 playedGames = 0
 printGames = 1
 MAX_GAMES = 100000
+
+winBase = Helper.readCasesFromStruct("Win_Base")
+lostBase = Helper.readCasesFromStruct("Loss_Base")
+print("First Win Base Case:")
+print(winBase.cases[3].action)
+print(winBase.cases[3].vector)
+print(winBase.cases[11].action)
+print(winBase.cases[11].vector)
+print(winBase.cases[12].action)
+print(winBase.cases[12].vector)
+print("Loading files finished.")
 
 while True:
 

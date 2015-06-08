@@ -2,6 +2,9 @@ import cv2
 import numpy as np
 import math
 import os
+import csv
+import CaseBase
+import struct
 from sys import maxint
 
 # load and preprocess methods for trainingsdata
@@ -41,6 +44,86 @@ def rectify(contour):
 	hnew[1] = poly[np.argmin(diff)]
 	hnew[3] = poly[np.argmax(diff)]
 	return hnew
+
+def saveCaseToFile(case, name):
+	with open(name + ".csv", "a") as csvfile:
+		casewriter = csv.writer(csvfile, delimiter='\t', lineterminator='\n', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+		casewriter.writerow([case.action] + case.vector)
+		csvfile.close()
+
+def saveCasesToFile(cases, name):
+	with open(name + ".csv", "a") as csvfile:
+		casewriter = csv.writer(csvfile, delimiter='\t', lineterminator='\n', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+		for case in cases:
+			casewriter.writerow([case.action] + case.vector)
+		csvfile.close()
+
+def saveCasesBinary(cases, name):
+	with open(name + ".cases", "a") as datafile:
+		for case in cases:
+			datafile.write(chr(case.action))
+			for i in range(len(case.vector)):
+				datafile.write(chr(case.vector[i]))
+			#datafile.write(chr(i) for i in ([case.action] + case.vector))
+			#datafile.write(bytes(int(i,31) for i in ([case.action] + case.vector)))
+		datafile.close()
+
+def packCasesToStruct(cases, name):
+	s = struct.Struct("B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B")
+	with open(name + ".cases", "a") as datafile:
+		for case in cases:
+			values = [case.action] + case.vector
+			packedData = s.pack(*values)
+			datafile.write(packedData)
+		datafile.close()
+
+def readCasesFromStruct(name):
+	caseBase = CaseBase.CaseBase(name)
+	s = struct.Struct("B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B")
+	with open(name + ".cases", "rb") as datafile:
+		while(True):
+			value = bytearray(datafile.read(31))
+			if not value or len(value) < 31:
+				break
+			currentCase = CaseBase.Case([])
+			unpackedData = s.unpack(value)
+			currentCase.action = unpackedData[0]
+			currentCase.vector = unpackedData[1:]
+			caseBase.cases.append(currentCase)
+			currentCase = CaseBase.Case([])
+	return caseBase
+
+def readCasesBinary(name):
+	caseBase = CaseBase.CaseBase(name)
+	loaded = 0
+	with open(name + ".cases", "rb") as datafile:
+		currentCase = CaseBase.Case([])
+		while True:
+			value = datafile.read(1)
+			if not value:
+				break
+			if loaded == 0:
+				currentCase.action = int(float(value[0]))
+			else:
+				currentCase.vector.append(int(float(value[0])))
+			if loaded == 30:
+				loaded == 0
+				caseBase.cases.append(currentCase)
+				currentCase = CaseBase.Case([])
+			loaded += 1
+	return caseBase
+
+def readCasesFromFile(name):
+	caseBase = CaseBase.CaseBase(name)
+	with open(name + ".csv", "rb") as csvfile:
+		casereader = csv.reader(csvfile, delimiter='\t', lineterminator='\n', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+		for case in casereader:
+			vector = []
+			action = int(case[0])
+			for vectorValue in case[1:]:
+				vector.append(int(vectorValue))
+			caseBase.cases.append(CaseBase.Case(vector, action))
+	return caseBase
 
 # returns the euclidian Distance between two 2D points
 def euclidDist(p1, p2):

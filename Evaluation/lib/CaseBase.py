@@ -1,4 +1,5 @@
 import random
+import HelperFunctions as Helper
 from sys import maxint
 from math import ceil
 from scipy import spatial
@@ -26,12 +27,15 @@ class CaseBase:
 	def __init__(self, name):
 		self.cases = []
 		self.name = name
+		self.inpersistentCases = []
 
 	def putCase(self, case):
 		self.cases.append(case)
-		if(len(self.cases) % CaseBase.PERSIST_AFTER) == 0:
-			print str(len(self.cases))  + " Games in " + self.name # TODO: persist casebase to file
-
+		self.inpersistentCases.append(case)
+		if len(self.inpersistentCases) >= CaseBase.PERSIST_AFTER:
+			Helper.packCasesToStruct(self.inpersistentCases, self.name)
+			self.inpersistentCases = []
+			print str(len(self.cases))  + " Games in " + self.name
 
 	def getClosestCase(self, case):
 		nearestCase = Case([0] * 30, Action.Stay)
