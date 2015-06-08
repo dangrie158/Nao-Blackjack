@@ -59,13 +59,6 @@ MAX_GAMES = 100000
 
 winBase = Helper.readCasesFromStruct("Win_Base")
 lostBase = Helper.readCasesFromStruct("Loss_Base")
-print("First Win Base Case:")
-print(winBase.cases[3].action)
-print(winBase.cases[3].vector)
-print(winBase.cases[11].action)
-print(winBase.cases[11].vector)
-print(winBase.cases[12].action)
-print(winBase.cases[12].vector)
 print("Loading files finished.")
 
 while True:

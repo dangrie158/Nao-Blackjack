@@ -83,14 +83,20 @@ def readCasesFromStruct(name):
 	with open(name + ".cases", "rb") as datafile:
 		while(True):
 			value = bytearray(datafile.read(31))
-			if not value or len(value) < 31:
+			if not value:
 				break
+			if len(value) < 31:
+				print "lost " + str(len(value)) + " bytes while reading"
 			currentCase = CaseBase.Case([])
 			unpackedData = s.unpack(value)
 			currentCase.action = unpackedData[0]
-			currentCase.vector = unpackedData[1:]
+			currentCase.vector = list(unpackedData[1:])
 			caseBase.cases.append(currentCase)
 			currentCase = CaseBase.Case([])
+
+	print('now rewriting new case base...')
+	packCasesToStruct(caseBase.cases, name);
+	print("done")
 	return caseBase
 
 def readCasesBinary(name):
