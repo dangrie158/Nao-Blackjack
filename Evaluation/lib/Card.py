@@ -2,10 +2,13 @@ import HelperFunctions as hf
 import operator
 import cv2
 import math
+import os
 
 
 VALUE_SIZE = (15, 20)
 VALUE_OFFSET = (5,5)
+
+TRAINSET = "trainingsset/"
 
 #very easy wrapper class to map values to
 # the relative index in the case vector
@@ -33,10 +36,15 @@ Value.Undefined = Value(-1, -1)
 #the imagedata from the camera and a value to calculate
 #the handvalue and the casevector
 class Card:
+	SIFT = cv2.SIFT()
+
 	def __init__(self, imageData, rect, value = Value.Undefined):
 		self.image = imageData
 		self.frameRectangle = rect
 		self.value = value
+
+		if imageData is not None:
+			self.generateSIFTDescriptor(Card.SIFT)
 
 	def getValueImage(self):
 		return hf.cropPercentage(self.image, (VALUE_OFFSET), tuple(map(operator.add, VALUE_SIZE, VALUE_OFFSET)))
@@ -80,4 +88,40 @@ class Card:
 				return absoluteRatio >= proximity
 		else:
 			return False
-		
+
+	def detectValueSIFT(self, sift):
+		matcher = cv2.BFMatcher()
+		selfKeyPoints, selfDescriptor = self.getSIFTDescriptor(sift)
+
+		bestNumGoodMatches = 0
+		bestMatch = None
+		bestFeatures = None
+		for sampleCard in Card.sampleSiftCards:
+
+			goodFeatures = []
+			matches = matcher.knmMatch(selfDescriptor, sampleCard.descriptor, k=1)
+			for n,m in matches:
+				if m.distance < 0.75 * n.distance:
+					goodFeatures.apped([m])
+
+			if len(goodFeatures) > bestNumGoodMatches:
+				bestNumGoodMatches = len(goodFeatures)
+				bestMatch = sampleCard
+				bestFeatures = goodFeatures
+
+		matchesImg = cv2.drawMatchesKnn(self.getValueImage(), selfKeyPoints, bestMatch.image, bestMatch.keypoints, bestFeatures, flags=2)
+		cv2.imshow("match", matchesImg)
+
+
+	def generateSIFTDescriptor(self, sift):
+		self.keypoints, self.descriptor = sift.detectAndCompute(self.getValueImage(), None)		
+
+def loadSampleSiftDescriptors(path):
+	cardPaths = os.listdir(path)
+	trainset = {}
+	for card in cardPaths:
+		cardImage = cv2.imread(os.path.join(path, card), flags=cv2.CV_LOAD_IMAGE_GRAYSCALE)
+		trainset[card] = Card(cardImage, None);
+	return trainset
+
+Card.sampleSiftDescriptors = loadSampleSiftDescriptors(TRAINSET)
