@@ -7,6 +7,9 @@ import CaseBase
 import struct
 from sys import maxint
 
+TRAINSET = "trainingsset2"
+SIFT = cv2.SIFT()
+
 # load and preprocess methods for trainingsdata
 def loadCards(trainSet):
 	cardPaths = os.listdir(trainSet)
@@ -134,6 +137,16 @@ def readCasesFromFile(name):
 # returns the euclidian Distance between two 2D points
 def euclidDist(p1, p2):
 	return math.hypot(p2[0] - p1[0], p2[1] - p1[1])
+
+
+def cvImageToNumpy(img):
+	#return (np.reshape(img, 450*450) / 256.0)
+	return np.asfarray(img).reshape((1, -1))[0]
+
+def numpyImageToCV(img):
+	img *= 255.0
+	img = img.astype(int)
+	return np.reshape(img, (450, 450))
 
 # Crops a given image to fit in a given rectangle
 def imageRerverseProjection(rectangle, im):  
