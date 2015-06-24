@@ -4,8 +4,11 @@ from lib.VirtualTable import VirtualTable
 from lib.Player import Player
 import cv2
 from NAOConnector import NAO
+import sys
 
 UseNAO = True
+RenderSteps = 25
+DetectSteps = 1
 
 if(UseNAO == False):
 	cap = cv2.VideoCapture(0)
@@ -56,6 +59,9 @@ if __name__ == '__main__':
 	table.setPlayer1(player1)
 	table.setPlayer2(player2)
 
+	rendered = 0
+	detected = 0
+
 	while(True):
 
 		# Capture Frame by Frame with Webcam
@@ -85,26 +91,33 @@ if __name__ == '__main__':
 		# Capture Frame by Frame with NAO
 		else:
 			if naoInitialized == True:
-				NAOImage = nao.getCameraImage()
-				cards = cd.getCards(NAOImage)
-		
-				for card in cards:
-					card.detectValueSIFT(cv2.SIFT())
+
+				if(rendered % RenderSteps == 0):
+					NAOImage = nao.getCameraImage()
+					cards = cd.getCards(NAOImage)
+					centerY = NAOImage.shape[0] / 2
 	
-				centerY = NAOImage.shape[0] / 2
-
-				divideOutCards(cards, player1, player2, centerY)
-				table.render()
-
-				drawBoundingBoxes(NAOImage, cards)
-				drawCenteroids(NAOImage, cards)
-				drawCenter(NAOImage)
+					divideOutCards(cards, player1, player2, centerY)
+					table.render(80, 160, 30)
+	
+					drawBoundingBoxes(NAOImage, cards)
+					drawCenteroids(NAOImage, cards)
+					drawCenter(NAOImage)
+				
 				cv2.imshow("Capture", NAOImage)
 
-				player1.reset()
-				player2.reset()
+				if(detected % DetectSteps == 0):
+					for card in cards:
+						card.detectValueSIFT(cv2.SIFT())
+
+				if(rendered % RenderSteps == 0):
+					player1.reset()
+					player2.reset()
 
 				if cv2.waitKey(1) & 0xFF == ord('q'):
 					nao.unsubscribeFromCamera()
 					break
+
+		rendered += 1
+		detected += 1
 	

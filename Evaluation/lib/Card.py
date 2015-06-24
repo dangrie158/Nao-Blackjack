@@ -101,7 +101,8 @@ class Card:
 		bestDistance = maxint
 
 		for sampleCardName, sampleCard in Card.sampleFiles.iteritems():
-			summaryDistance = 0
+			# sum in the beginning not zero to avoid zero division errors
+			summaryDistance = 0.01
 			matches = matcher.match(self.descriptor, sampleCard.descriptor)
 			matches = sorted(matches, key = lambda x:x.distance)
 
