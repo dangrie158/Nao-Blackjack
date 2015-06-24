@@ -2,41 +2,22 @@ import HelperFunctions as hf
 import operator
 import cv2
 import math
-import os
-from sys import maxint
-from numpy import average, copy, reshape
-import eigenVectorDetection as ev
+from RecognitionEngine import SIFTRecognitionEngine
+from RecognitionEngine import EigenRecognitionEngine
+from RecognitionEngine import Value
 
 VALUE_SIZE = (40, 20)
 VALUE_OFFSET = (5,5)
 
+TRAINSET = "trainingsset2"
 
-#very easy wrapper class to map values to
-# the relative index in the case vector
-class Value:
-	def __init__(self, index, value):
-		self.index = index
-		self.value = value
-
-Value.Two = Value(0, 2)
-Value.Three = Value(1, 3)
-Value.Four = Value(2, 4)
-Value.Five = Value(3, 5)
-Value.Six = Value(4, 6)
-Value.Seven = Value(5, 7)
-Value.Eight = Value(6, 8)
-Value.Nine = Value(7, 9)
-Value.Ten = Value(8, 10)
-Value.Jack = Value(8, 10)
-Value.Queen = Value(8, 10)
-Value.King = Value(8, 10);
-Value.Ace = Value(9, 0)
-Value.Undefined = Value(-1, -1)
+CurrentRecognitionEngine = EigenRecognitionEngine();
+CurrentRecognitionEngine.train(TRAINSET)
 
 #the representation af a card. this is both,
 #the imagedata from the camera and a value to calculate
 #the handvalue and the casevector
-class Card:
+class Card(object):
 
 	def __init__(self, imageData, rect, value = Value.Undefined):
 		self.image = imageData
@@ -44,12 +25,10 @@ class Card:
 		self.value = value
 
 		if imageData is not None:
-			self.generateSIFTDescriptor(hf.SIFT, self.getValueImage())
-
-		if hasattr(Card, "eigenSpace"):
-			self.numpyImage = hf.cvImageToNumpy(self.getValueImage())
-			self.avgImage = self.numpyImage - Card.averageImage
-			self.calculateEigenFace(Card.eigenSpace)
+			if not CurrentRecognitionEngine.recognize(self):
+				print "Unrecognized Card"
+			else:
+				print "detected " + self.value.name
 
 	def getValueImage(self):
 		return hf.cropPercentage(self.image, (VALUE_OFFSET), tuple(map(operator.add, VALUE_SIZE, VALUE_OFFSET)))
@@ -93,66 +72,3 @@ class Card:
 				return absoluteRatio >= proximity
 		else:
 			return False
-
-	def detectValueSIFT(self, sift):
-		matcher = cv2.BFMatcher()
-		bestNumGoodMatches = 0
-		bestMatch = None
-		bestDistance = maxint
-
-		for sampleCardName, sampleCard in Card.sampleFiles.iteritems():
-			summaryDistance = 0
-			matches = matcher.match(self.descriptor, sampleCard.descriptor)
-			matches = sorted(matches, key = lambda x:x.distance)
-
-			for m in matches:
-				summaryDistance += int(m.distance)
-			if((summaryDistance / len(matches)) < bestDistance):
-				bestMatch = sampleCardName
-				bestDistance = summaryDistance / len(matches)
-		print "Best Match is: " + bestMatch
-
-
-	def detectValueEigen(self):
-		transposedImages = []
-		fileNames = []
-		for fileName, card in Card.sampleFiles.iteritems():
-			fileNames.append(fileName)
-			transposedImages.append(card.transposedImg)
-		closestFile, distance = ev.calculateDistance(transposedImages, self.transposedImg, fileNames)
-		print "closest distance: " + str(distance) + " image: " + fileNames[closestFile]
-
-
-	def calculateEigenFace(self, eigenspace):
-		self.transposedImg = ev.transformToEigenfaceSpace(eigenspace, self.avgImage, ev.NUMFEATURES)
-
-	def generateSIFTDescriptor(self, sift, image):
-		self.keypoints, self.descriptor = sift.detectAndCompute(image, None)	
-
-
-def generateEigenSpace(cards):
-	images = []
-	for card in cards.itervalues():
-		npImg = hf.cvImageToNumpy(card.getValueImage())
-		images.append(npImg)
-		card.numpyImage = npImg
-	avgImage = ev.calculateAverageImg(copy(images))
-	#cv2.imshow("average", hf.numpyImageToCV(avgImage))
-	normedArrayOfFaces = ev.removeAverageImage(copy(images), avgImage)
-	eigenspace = ev.calculateEigenfaces(normedArrayOfFaces.T, len(images[0]), len(images))
-	for card in cards.itervalues():
-		card.avgImage = card.numpyImage - avgImage
-		card.calculateEigenFace(eigenspace)
-	return eigenspace, avgImage
-
-def loadSampleFiles(path):
-	cardPaths = os.listdir(path)
-	trainset = {}
-	for card in cardPaths:
-		cardName = card[0:-4]
-		cardImage = cv2.imread(os.path.join(path, card), 0)
-		trainset[cardName] = Card(cardImage, None);
-	return trainset
-
-Card.sampleFiles = loadSampleFiles(os.path.join(os.getcwd(), hf.TRAINSET))
-Card.eigenSpace, Card.averageImage = generateEigenSpace(Card.sampleFiles)

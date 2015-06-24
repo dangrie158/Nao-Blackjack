@@ -6,9 +6,6 @@ import cv2
 
 cap = cv2.VideoCapture(0)
 
-
-
-
 # Draws given bounding boxes onto a image
 def drawBoundingBoxes(frame, cards):
 	for card in cards:
@@ -50,9 +47,6 @@ if __name__ == '__main__':
 	    # Capture frame-by-frame
 	    ret, frame = cap.read()
 	    cards = cd.getCards(frame)
-
-	    for card in cards:
-	    	card.detectValueEigen()
 
 	    centerY = frame.shape[0] / 2
 

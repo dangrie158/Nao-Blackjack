@@ -19,12 +19,12 @@ class VirtualTable:
 	def renderCards(self, frame, cards, start, margin, cardWidth, cardHeight):
 		dx, dy = [0, 0]
 
-		writePath = os.path.join(os.getcwd(), hf.TRAINSET)
+		#writePath = os.path.join(os.getcwd(), hf.TRAINSET)
 
 		for card in cards:
 			
-			#cardThumbnail = card.getThumbnail((cardWidth, cardHeight))
-			cardThumbnail = card.getValueImage()
+			cardThumbnail = card.getThumbnail((cardWidth, cardHeight))
+			#cardThumbnail = card.getValueImage()
 
 			## writing one detected file to disk:
 			#wert = self.cardname

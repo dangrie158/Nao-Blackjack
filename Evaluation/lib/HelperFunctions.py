@@ -7,9 +7,6 @@ import CaseBase
 import struct
 from sys import maxint
 
-TRAINSET = "trainingsset2"
-SIFT = cv2.SIFT()
-
 # load and preprocess methods for trainingsdata
 def loadCards(trainSet):
 	cardPaths = os.listdir(trainSet)

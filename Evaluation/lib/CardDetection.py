@@ -12,10 +12,6 @@ def loadCards(path):
 		trainset[card] = cardImage
 	return trainset
 
-# returns direct nearest difference image on given trainingsset
-def returnDirectDiffImage(trainingSet, img):
-	return sorted(trainingSet.values(), key=lambda x:imgdiff(x,img))[0]
-
 # Returns contours of a Image
 def getContours(im):
 	contours, hierarchy = cv2.findContours(im,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)

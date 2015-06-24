@@ -1,13 +1,9 @@
-from os.path import isdir, join, normpath
-from os import listdir
-from PIL import Image
 from numpy import asfarray, dot, zeros, asarray, absolute
 from numpy import average, copy
 from numpy.linalg import eigh, norm
 import sys
-import tkFileDialog
 
-NUMFEATURES = 6
+NUMFEATURES = 10
 IMG_WIDTH = 450
 IMG_HEIGHT = 450
 
@@ -82,12 +78,11 @@ def mergeImage(rArray, gArray, bArray, width=IMG_WIDTH, height=IMG_HEIGHT):
     bChannel = imageFromNormalizedArray(bArray).convert('RGB').split()[2]
     return Image.merge('RGB', (rChannel, gChannel, bChannel))
 
-def calculateDistance(transposedFaces, testface, imageFileNames):
+def calculateDistance(transposedFaces, testface):
     distance = sys.float_info.max
     closestMatchIndex = 0
     for index, face in enumerate(transposedFaces):
         newdistance = norm(testface - face)
-        #print str(newdistance) + " image: " + imageFileNames[index]
         if distance > newdistance:
             closestMatchIndex = index
             distance = newdistance
@@ -97,6 +92,11 @@ def calculateDistance(transposedFaces, testface, imageFileNames):
 #Start of main programm
 
 if __name__ == '__main__':
+    from os.path import isdir, join, normpath
+    from os import listdir
+    from PIL import Image
+
+    import tkFileDialog
 
     #Choose Directory which contains all training images 
     TrainDir=tkFileDialog.askdirectory(title="Choose Directory of training images")
