@@ -3,15 +3,16 @@ import lib.HelperFunctions as hf
 from lib.VirtualTable import VirtualTable
 from lib.Player import Player
 import cv2
-from NAOConnector import NAO
 import sys
 
-UseNAO = True
+UseNAO = False
 RenderSteps = 25
 DetectSteps = 1
 
 if(UseNAO == False):
 	cap = cv2.VideoCapture(0)
+else:
+	from NAOConnector import NAO
 
 # Draws given bounding boxes onto a image
 def drawBoundingBoxes(frame, cards):
@@ -68,9 +69,6 @@ if __name__ == '__main__':
 		if(UseNAO == False):
 			ret, frame = cap.read()
 			cards = cd.getCards(frame)
-	
-			for card in cards:
-				card.detectValueEigen()
 	
 			centerY = frame.shape[0] / 2
 	
