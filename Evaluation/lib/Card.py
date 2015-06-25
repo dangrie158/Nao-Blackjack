@@ -4,6 +4,7 @@ import cv2
 import math
 from RecognitionEngine import SIFTRecognitionEngine
 from RecognitionEngine import EigenRecognitionEngine
+from RecognitionEngine import BinaryRecognitionEngine
 from RecognitionEngine import Value
 
 VALUE_SIZE = (40, 20)
@@ -11,7 +12,7 @@ VALUE_OFFSET = (5,5)
 
 TRAINSET = "trainingsset2"
 
-CurrentRecognitionEngine = SIFTRecognitionEngine(useValueOnly = False);
+CurrentRecognitionEngine = BinaryRecognitionEngine(useValueOnly = True);
 CurrentRecognitionEngine.train(TRAINSET)
 
 #the representation af a card. this is both,
