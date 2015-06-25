@@ -11,7 +11,7 @@ VALUE_OFFSET = (5,5)
 
 TRAINSET = "trainingsset2"
 
-CurrentRecognitionEngine = EigenRecognitionEngine();
+CurrentRecognitionEngine = SIFTRecognitionEngine(useValueOnly = False);
 CurrentRecognitionEngine.train(TRAINSET)
 
 #the representation af a card. this is both,
@@ -25,10 +25,7 @@ class Card(object):
 		self.value = value
 
 		if imageData is not None:
-			if not CurrentRecognitionEngine.recognize(self):
-				print "Unrecognized Card"
-			else:
-				print "detected " + self.value.name
+			CurrentRecognitionEngine.recognize(self)
 
 	def getValueImage(self):
 		return hf.cropPercentage(self.image, (VALUE_OFFSET), tuple(map(operator.add, VALUE_SIZE, VALUE_OFFSET)))

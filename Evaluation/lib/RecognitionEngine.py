@@ -1,11 +1,19 @@
 import os
 import cv2
+import operator
 from sys import maxint
 from numpy import average, copy, reshape
 import eigenVectorDetection as ev
 import HelperFunctions as hf
 
+
 SIFT = cv2.SIFT()
+
+#The size of the corner of the card with the value
+#this has not to match the values in Card.py and are independant from one another
+#since they both serve their own purpose
+VALUE_SIZE = (40, 20)
+VALUE_OFFSET = (5,5)
 
 #very easy wrapper class to map values to
 # the relative index in the case vector
@@ -50,9 +58,10 @@ def getValueFromName(name):
 	}[valuePart]
 
 class RecognitionEngine:
-	def __init__(self):
+	def __init__(self, useValueOnly = False):
 		self.isTrained = False
 		self.trainSet = []
+		self.useValueOnly = useValueOnly
 
 	def train(self, trainSetPath):
 		self.isTrained = True
@@ -60,10 +69,16 @@ class RecognitionEngine:
 	def recognize(self, card):
 		pass
 
+	def cropImageToValue(self, imageData):
+		return hf.cropPercentage(imageData, (VALUE_OFFSET), tuple(map(operator.add, VALUE_SIZE, VALUE_OFFSET)))
+
 class SIFTRecognitionEngine(RecognitionEngine):
 
 	class SiftCard:
-		def __init__(self, imageData, value):
+		def __init__(self, outer, imageData, value):
+			if outer.useValueOnly:
+				imageData = outer.cropImageToValue(imageData)
+
 			self.keypoints, self.descriptor = SIFT.detectAndCompute(imageData, None)
 			self.value = value
 
@@ -72,10 +87,14 @@ class SIFTRecognitionEngine(RecognitionEngine):
 		cardPaths = os.listdir(path)
 		for cardFile in cardPaths:
 			cardImage = cv2.imread(os.path.join(path, cardFile), 0)
-			self.trainSet.append(SIFTRecognitionEngine.SiftCard(cardImage, getValueFromName(cardFile)))
+			self.trainSet.append(SIFTRecognitionEngine.SiftCard(self, cardImage, getValueFromName(cardFile)))
 
 	def recognize(self, card):
-		card.keypoints, card.descriptor = SIFT.detectAndCompute(card.image, None)
+		imageData = card.image
+		if self.useValueOnly:
+			imageData = self.cropImageToValue(imageData)
+
+		card.keypoints, card.descriptor = SIFT.detectAndCompute(imageData, None)
 		matcher = cv2.BFMatcher()
 		bestNumGoodMatches = 0
 		bestMatch = None
@@ -106,12 +125,11 @@ class SIFTRecognitionEngine(RecognitionEngine):
 class EigenRecognitionEngine(RecognitionEngine):
 
 	class EigenCard:
-		def __init__(self, imageData, value):
+		def __init__(self, outer, imageData, value):
+			if outer.useValueOnly:
+				imageData = outer.cropImageToValue(imageData)
 			self.numpyImage = hf.cvImageToNumpy(imageData)
 			self.value = value
-
-		def calculateEigenFace(self, eigenspace):
-			self.transposedImg = ev.transformToEigenfaceSpace(eigenspace, self.avgImage, ev.NUMFEATURES)
 
 	def train(self, trainSetPath):
 		path = os.path.join(os.getcwd(), trainSetPath)
@@ -119,7 +137,7 @@ class EigenRecognitionEngine(RecognitionEngine):
 		self.trainSet = []
 		for cardFile in cardPaths:
 			cardImage = cv2.imread(os.path.join(path, cardFile), 0)
-			self.trainSet.append(EigenRecognitionEngine.EigenCard(cardImage, getValueFromName(cardFile)))
+			self.trainSet.append(EigenRecognitionEngine.EigenCard(self, cardImage, getValueFromName(cardFile)))
 	
 		images = [card.numpyImage for card in self.trainSet]
 
@@ -131,10 +149,13 @@ class EigenRecognitionEngine(RecognitionEngine):
 
 		for card in self.trainSet:
 			card.avgImage = card.numpyImage - self.avgImage
-			card.calculateEigenFace(self.eigenspace)
+			card.transposedImg = ev.transformToEigenfaceSpace(self.eigenspace, self.avgImage, ev.NUMFEATURES)
 
 	def recognize(self, card):
-		numpyCardImage = hf.cvImageToNumpy(card.image);
+		imageData = card.image
+		if self.useValueOnly:
+			imageData = self.cropImageToValue(imageData)
+		numpyCardImage = hf.cvImageToNumpy(imageData);
 		numpyCardImage -= self.avgImage
 		transposedImg = ev.transformToEigenfaceSpace(self.eigenspace, numpyCardImage, ev.NUMFEATURES)
 		matchIndex, distance = ev.calculateDistance(self.transposedImages, transposedImg)

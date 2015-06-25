@@ -3,7 +3,7 @@ from numpy import average, copy
 from numpy.linalg import eigh, norm
 import sys
 
-NUMFEATURES = 10
+NUMFEATURES = 7
 IMG_WIDTH = 450
 IMG_HEIGHT = 450
 
