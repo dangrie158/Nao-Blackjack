@@ -3,16 +3,15 @@ import lib.HelperFunctions as hf
 from lib.VirtualTable import VirtualTable
 from lib.Player import Player
 import cv2
-import sys
 
-UseNAO = False
-RenderSteps = 25
-DetectSteps = 1
-
+UseNAO = True
 if(UseNAO == False):
 	cap = cv2.VideoCapture(0)
 else:
-	from NAOConnector import NAO
+	import NAOConnector
+	import NAOListener
+
+NAOTouchListener = None	
 
 # Draws given bounding boxes onto a image
 def drawBoundingBoxes(frame, cards):
@@ -45,13 +44,21 @@ def divideOutCards(cards, player1, player2, threshold):
 if __name__ == '__main__':
 
 	if(UseNAO == True):
-		nao = NAO("192.168.0.105", 9559)
-		naoInitialized = nao.init()
+		NAO_IP = "192.168.0.105"
+		NAO_PORT = 9559
+		NAO = NAOConnector.NAO(NAO_IP, NAO_PORT)
+		NAOTouchListener = NAOListener.startNAOListener(NAO_IP, NAO_PORT)
+		NAOTouchListener.setConnector(NAO)
+		
+		naoInitialized = NAO.setup()
 		if naoInitialized == True:
-			nao.enableStandardPosture()
-			nao.setJointPosition("HeadYaw" , 0.0)
-			nao.setJointPosition("HeadPitch" , 29.5)
-			nao.subscribeToCamera()
+			NAO.enableStandardPosture()
+			NAO.sayMessage("Live fast, die young!")
+			#NAO.playWinAnimation()
+			#NAO.playLooseAnimation()
+			NAO.setJointPosition("HeadYaw" , 0.0)
+			NAO.setJointPosition("HeadPitch" , 29.5)
+			NAO.subscribeToCamera()
 
 	table = VirtualTable("Game Table")
 	player1 = Player()
@@ -59,9 +66,6 @@ if __name__ == '__main__':
 	
 	table.setPlayer1(player1)
 	table.setPlayer2(player2)
-
-	rendered = 0
-	detected = 0
 
 	while(True):
 
@@ -90,32 +94,24 @@ if __name__ == '__main__':
 		else:
 			if naoInitialized == True:
 
-				if(rendered % RenderSteps == 0):
-					NAOImage = nao.getCameraImage()
-					cards = cd.getCards(NAOImage)
-					centerY = NAOImage.shape[0] / 2
+				NAOImage = NAO.getCameraImage()
+				cards = cd.getCards(NAOImage)
+
+				centerY = NAOImage.shape[0] / 2
 	
-					divideOutCards(cards, player1, player2, centerY)
-					table.render(80, 160, 30)
+				divideOutCards(cards, player1, player2, centerY)
+				table.render(80, 160, 30)
 	
-					drawBoundingBoxes(NAOImage, cards)
-					drawCenteroids(NAOImage, cards)
-					drawCenter(NAOImage)
+				drawBoundingBoxes(NAOImage, cards)
+				drawCenteroids(NAOImage, cards)
+				drawCenter(NAOImage)
 				
 				cv2.imshow("Capture", NAOImage)
 
-				if(detected % DetectSteps == 0):
-					for card in cards:
-						card.detectValueSIFT(cv2.SIFT())
-
-				if(rendered % RenderSteps == 0):
-					player1.reset()
-					player2.reset()
+				player1.reset()
+				player2.reset()
 
 				if cv2.waitKey(1) & 0xFF == ord('q'):
-					nao.unsubscribeFromCamera()
+					NAO.shutdown()
 					break
-
-		rendered += 1
-		detected += 1
 	
