@@ -2,11 +2,12 @@ import lib.CardDetection as cd
 import lib.HelperFunctions as hf
 from lib.VirtualTable import VirtualTable
 from lib.Player import Player
+from lib.RecognitionEngine import Value
 import cv2
 
-UseNAO = True
+UseNAO = False
 if(UseNAO == False):
-	cap = cv2.VideoCapture(0)
+	cap = cv2.VideoCapture(1)
 else:
 	import NAOConnector
 	import NAOListener
@@ -40,6 +41,8 @@ def divideOutCards(cards, player1, player2, threshold):
 		else:
 			player2.addCard(card)
 
+
+
 # main execution method
 if __name__ == '__main__':
 
@@ -68,11 +71,13 @@ if __name__ == '__main__':
 	table.setPlayer2(player2)
 
 	while(True):
+		
 
 		# Capture Frame by Frame with Webcam
 		if(UseNAO == False):
 			ret, frame = cap.read()
-			cards = cd.getCards(frame)
+			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+			cards = recognizeCards()
 	
 			centerY = frame.shape[0] / 2
 	
