@@ -46,6 +46,4 @@ class CardDeck:
 			copy.addCard(card)
 			if copy.getHandValue() > 21:
 				cardsToGetBust += 1
-
 		return cardsToGetBust / self.amount()
-

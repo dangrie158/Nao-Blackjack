@@ -1,7 +1,12 @@
 import cv2
 import CardDetection as cd
 
-captureDevice = cv2.VideoCapture(0)
+useNAO = True
+
+if useNAO:
+	import NAOConnector
+else:
+	captureDevice = cv2.VideoCapture(0)
 
 def drawBoundingBoxes(frame, cards):
 	for card in cards:
@@ -23,10 +28,14 @@ def drawCenter(frame):
 	cv2.line(frame, p1, p2, (255,0,255))
 
 def getFrame():
-	ret, frame = captureDevice.read()
-	frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+	frame = None
+	if useNAO:
+		frame = NAOConnector.getNAO().getCameraImage()
+	else:
+		ret, frame = captureDevice.read()
+		frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	#cards = cd.getCards(frame)
 	#drawBoundingBoxes(frame, cards)
 	#drawCenteroids(frame, cards)
 	#drawCenter(frame)
-	return ret, frame
+	return frame

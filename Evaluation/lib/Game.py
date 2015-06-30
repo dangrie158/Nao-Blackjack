@@ -72,12 +72,14 @@ class Game:
 		for card in newCards:
 			tempDeck.pick(card.value)
 
-		self.finishMove();
+		decision = False
 
 		if tempDeck.bustPropability(self.player) < RISK_TAKING_PROPENSITY:
-			return True
-		else:
-			return False
+			decision = True
+
+		self.finishMove();
+
+		return decision
 
 
 	def getWinner(self):
@@ -114,7 +116,7 @@ class Game:
 		#then get the match that happend most.
 		frame = None
 		for cycle in range(numCycles):
-			ret, frame = Camera.getFrame()
+			frame = Camera.getFrame()
 
 			cv2.imshow("LatestFrame", frame)
 			cards = cd.getCards(frame)
@@ -155,7 +157,7 @@ class Game:
 	@staticmethod
 	def divideOutCards(cards, player1, player2, threshold):
 		for card in cards:
-			if card.getCenteroidInFrame()[1] < threshold:
+			if card.getCenteroidInFrame()[1] > threshold:
 				player1.addCard(card)
 			else:
 				player2.addCard(card)
