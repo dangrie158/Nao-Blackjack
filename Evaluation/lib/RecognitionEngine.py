@@ -43,6 +43,24 @@ class Value:
 			"ass": Value.Ace
 		}[valuePart]
 
+	@staticmethod
+	def getValueFromIndex(index):
+		return {
+			Value.Two.index: Value.Two,
+			Value.Three.index: Value.Three,
+			Value.Four.index: Value.Four,
+			Value.Five.index: Value.Five,
+			Value.Six.index: Value.Six,
+			Value.Seven.index: Value.Seven,
+			Value.Eight.index: Value.Eight,
+			Value.Nine.index: Value.Nine,
+			Value.Ten.index: Value.Ten,
+			Value.Jack.index: Value.Jack,
+			Value.Queen.index: Value.Queen,
+			Value.King.index: Value.King,
+			Value.Ace.index: Value.Ace
+		}[index]
+
 Value.Two = Value(0, 2, "Two")
 Value.Three = Value(1, 3, "Three")
 Value.Four = Value(2, 4, "Four")
@@ -52,10 +70,10 @@ Value.Seven = Value(5, 7, "Seven")
 Value.Eight = Value(6, 8, "Eight")
 Value.Nine = Value(7, 9, "Nine")
 Value.Ten = Value(8, 10, "Ten")
-Value.Jack = Value(8, 10, "Jack")
-Value.Queen = Value(8, 10, "Queen")
-Value.King = Value(8, 10, "King");
-Value.Ace = Value(9, 0, "Ace")
+Value.Jack = Value(9, 10, "Jack")
+Value.Queen = Value(10, 10, "Queen")
+Value.King = Value(11, 10, "King");
+Value.Ace = Value(12, 0, "Ace")
 Value.Undefined = Value(-1, -1, "Unknown")
 
 class RecognitionEngine:

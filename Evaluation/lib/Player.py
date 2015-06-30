@@ -31,7 +31,10 @@ class Player:
 		return value
 
 	def getCards(self):
-		cards = []
-		for card in self.cards:
-			cards.append(card.value.value)
-		return cards
+		return list(self.cards)
+
+	def getCopy(self):
+		cardsCopy = self.getCards()
+		player = Player()
+		player.addCard(cardsCopy)
+		return player
