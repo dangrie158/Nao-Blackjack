@@ -18,7 +18,7 @@ def getContours(im):
 	contours = sorted(contours, key=cv2.contourArea,reverse=True)[:MAX_NUMCARDS * 2]
 	return contours
 
-def getCards(frame, minArea=100):
+def getCards(frame, minArea=150):
 	cards = []
 	#gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	gray = frame

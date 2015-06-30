@@ -49,11 +49,11 @@ if __name__ == '__main__':
 		NAO = NAOConnector.NAO(NAO_IP, NAO_PORT)
 		NAOTouchListener = NAOListener.startNAOListener(NAO_IP, NAO_PORT)
 		NAOTouchListener.setConnector(NAO)
-		
 		naoInitialized = NAO.setup()
 		if naoInitialized == True:
-			NAO.enableStandardPosture()
-			NAO.sayMessage("Live fast, die young!")
+			NAO.standup()
+			NAO.sayMessage("Hello, lets play some Blackjack.")
+			NAO.sayMessage("Push my Head Button to start a game!")
 			#NAO.playWinAnimation()
 			#NAO.playLooseAnimation()
 			NAO.setJointPosition("HeadYaw" , 0.0)

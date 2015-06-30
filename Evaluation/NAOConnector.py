@@ -15,6 +15,7 @@ class NAO():
 	def __init__(self, IPAdress, PortNumber):
 		self.IP = IPAdress
 		self.PORT = PortNumber
+		self.standing = False
 
 	def setup(self):
 		try:
@@ -80,6 +81,10 @@ class NAO():
 				self.behavior.runBehavior(name)
 				return None
 
+	def getBehaviors(self):
+		if hasattr(self, 'behavior'):
+			return self.behavior.getInstalledBehaviors()
+
 	def stopBehavior(self, name):
 		if hasattr(self, 'behavior'):
 			self.behavior.stopBehavior(name)
@@ -99,11 +104,17 @@ class NAO():
 	def shutdown(self):
 		self.unsubscribeFromCamera()
 
-	def enableStandardPosture(self):
+	def standup(self):
 		if hasattr(self,'posture'):
-			self.posture.goToPosture("Stand", 0.5)
+			self.posture.goToPosture("Stand", 0.65)
+		self.standing = True
 
-	def setJointPosition(self, bodyPart, angleInput, speed = 0.5):
+	def sitdown(self):
+		if hasattr(self,'posture'):
+			self.posture.goToPosture("Crouch", 0.65)
+		self.standing = False
+
+	def setJointPosition(self, bodyPart, angleInput, speed = 0.3):
 		if hasattr(self,'motion'):
 			angle = angleInput * almath.TO_RAD
 			self.motion.setAngles(bodyPart, angle, speed)
