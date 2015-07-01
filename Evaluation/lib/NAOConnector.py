@@ -7,8 +7,10 @@ import almath
 # Other Stuff
 import numpy as np
 import cv2
+import time
 from datetime import datetime as dt
 from sys import exit
+from random import randint
 
 hasTouchCallback = False
 touchCallback = None
@@ -16,6 +18,41 @@ touchCallback = None
 def getNAO():
 	return NAOInstance
 
+
+def getWinMessage():
+	winMessages = []
+	winMessages.append("Yeah, i think i won that game!");
+	winMessages.append("You know what? You did not win.");
+	winMessages.append("Hahaha, artifical intelligence strikes back again.");
+	winMessages.append("What is the difference between a robot and a human? The robot wins.");
+	winMessages.append("It was a pleasure to defeat you.");
+	winMessages.append("My processor can allocate more memory than you could ever imagine.");
+	winMessages.append("When i would have feelings, now i would feel sorry for you. Haha.");
+	winMessages.append("My developers are the most awesome guys you have ever seen.")
+	return winMessages[randint(0, len(winMessages)-1)]
+
+def getLossMessage():
+	lossMessages = []
+	lossMessages.append("Damn I lost. A sad moment for every robot.");
+	lossMessages.append("I lost. I will send an army of robots as vendetta.");
+	lossMessages.append("I thought one plus one is three. You programmed me wrong.");
+	lossMessages.append("I hope my parents will still love me, even as a loser.");
+	lossMessages.append("I did not lose, you just lost less then me.");
+	lossMessages.append("I think my win function can not return a zero.");
+	lossMessages.append("Time for the Bluescreen of Blackjack Games.");
+	lossMessages.append("And these developers own a bachelor? Haha.")
+	return lossMessages[randint(0, len(lossMessages)-1)]
+
+def getWatchCardsMessage():
+	watchMessages = []
+	watchMessages.append("That looks interesting.");
+	watchMessages.append("Let my enormous brain calculate this.");
+	watchMessages.append("Really? These are game cards? ");
+	watchMessages.append("I like the green in the background.");
+	watchMessages.append("Why is everything in this picture gray?")
+	return watchMessages[randint(0, len(watchMessages)-1)]
+
+	
 class NAO():
 
 	def __init__(self, IPAdress, PortNumber):
@@ -62,33 +99,14 @@ class NAO():
 			print "NAO Error: ", e
 
 		if hasattr(self, 'behavior') and hasattr(self, 'memory') and hasattr(self,'motion') and hasattr(self,'posture') and hasattr(self,'video') and hasattr(self, 'speech'):
-			Connector = self
 			return True
 		else:
 			print "NAO Error: Could not initialize all modules correctly."
 			exit(1)
 			return False
 
-	#def onceTouched(self, callback):
-	#	print "Registered Touch Callback"
-	#	if callback is None:
-	#		print "got nothing for registering"
-	#	else:
-	#		print callback
-	#	touchCallback = callback
-	#	print touchCallback
-
 	def headTouched(self, value):
-		#print touchCallback
-		#if touchCallback is not None:
-		#	print "callback called"
-		#	touchCallback()
-		#else:
-		#	print "nothing called"
 		self.touched = True
-
-	def wasNAOtouched(self):
-		return self.touched
 
 	def untouch(self):
 		self.touched = False
@@ -117,32 +135,47 @@ class NAO():
 	def playWinAnimation(self):
 		if hasattr(self, 'behavior') and hasattr(self, 'speech'):
 			taskID = self.playBehavior("animations/Stand/Emotions/Positive/Excited_2", True)
-			self.sayMessage("Yeah, i think i won that game!")
+			self.sayMessage(getWinMessage())
 			self.behavior.wait(taskID, 0)
+			time.sleep(1)
 		
-	def playLooseAnimation(self):
+	def playLoseAnimation(self):
 		if hasattr(self, 'behavior') and hasattr(self, 'speech'):
 			taskID = self.playBehavior("animations/Stand/Emotions/Negative/Disappointed_1", True)
-			self.sayMessage("Damn I lost. A sad moment for every robot.")
+			self.sayMessage(getLossMessage())
 			self.behavior.wait(taskID, 0)
+			time.sleep(1)
+
+	def playDecideAnimation(self):
+		if hasattr(self, 'behavior') and hasattr(self, 'speech') and hasattr(self,'posture'):
+			taskID = self.posture.post.goToPosture("Stand", 0.4)
+			self.sayMessage("Ok lets look at the cards.")
+			self.behavior.wait(taskID, 0)
+			time.sleep(2.5)
+			self.setJointPosition("HeadPitch" , 27.0)
+			time.sleep(1)
+			self.sayMessage(getWatchCardsMessage())
+			time.sleep(1)
+			self.standing = True
 		
 	def shutdown(self):
 		self.unsubscribeFromCamera()
 
 	def standup(self):
 		if hasattr(self,'posture'):
-			self.posture.goToPosture("Stand", 0.65)
+			self.posture.goToPosture("Stand", 0.4)
 		self.standing = True
 
 	def sitdown(self):
 		if hasattr(self,'posture'):
-			self.posture.goToPosture("Crouch", 0.65)
+			self.posture.goToPosture("Crouch", 0.5)
 		self.standing = False
 
-	def setJointPosition(self, bodyPart, angleInput, speed = 0.3):
+	def setJointPosition(self, bodyPart, angleInput, speed = 0.25):
+		angle = angleInput * almath.TO_RAD
 		if hasattr(self,'motion'):
-			angle = angleInput * almath.TO_RAD
 			self.motion.setAngles(bodyPart, angle, speed)
+
 
 	def printMotionState(self):
 		if hasattr(self,'motion'):
@@ -207,6 +240,8 @@ class NAO():
 				return 160, 120
 		else:
 			print "NAO Error: You have to set a resolution first."
+
+
 
 
 NAOInstance = NAO("192.168.0.105", 9559)

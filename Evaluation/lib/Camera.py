@@ -34,8 +34,4 @@ def getFrame():
 	else:
 		ret, frame = captureDevice.read()
 		frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-	#cards = cd.getCards(frame)
-	#drawBoundingBoxes(frame, cards)
-	#drawCenteroids(frame, cards)
-	#drawCenter(frame)
 	return frame

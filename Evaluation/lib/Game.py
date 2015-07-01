@@ -19,54 +19,34 @@ class Game:
 	def newDeck(self):
 		self.deck = CardDeck()
 
-	def finishMove(self):
+	def resetGameState(self):
 		self.player.reset()
 		self.bank.reset()
 
 	def playerDoMove(self):
 		newCards, frame = Game.recognizeCards()
 
+		Camera.drawBoundingBoxes(frame, newCards)
+		Camera.drawCenteroids(frame, newCards)
+		Camera.drawCenter(frame)
+		cv2.imshow("LatestFrame", frame)
+
+		print "Recognized Cards: " + str(len(newCards))
+
 		centerY = frame.shape[0] / 2
 		Game.divideOutCards(newCards, self.player, self.bank, centerY)
 		self.table.render()
 
 		playerNewValue = self.player.getHandValue()
+		print "Player Hand Value is now: " + str(playerNewValue)
 		if playerNewValue > 21:
-			self.finishMove();
+			self.resetGameState();
+			print "Bank has won, player was over 21"
 			return self.bank
 		elif playerNewValue == 21:
-			self.finishMove();
+			self.resetGameState();
+			print "Player has won, that was a Blackjack (=21)"
 			return self.player
-
-		#old cards already is a copy we can modify
-		#oldCards = self.player.getCards()
-		#oldCards += self.bank.getCards()
-
-		#oldCardsIndicesToRemove = []
-		#newCardIndicesToRemove = []
-		#for cardIndex, card in enumerate(newCards):
-		#	for oldCardIndex, oldCard in enumerate(oldCards):
-		#		if card.value.index == oldCard.value.index:
-		#			#remove the card from the recognized cards,
-		#			#because its already there
-		#			oldCardsIndicesToRemove.append(oldCardIndex)
-
-		#			#and also remove it from the last 
-		#			#recognized cards to avoid double recognition
-		#			newCardIndicesToRemove.append(cardIndex)
-		
-
-		#newCardIndicesToRemove.sort()
-		#newCardIndicesToRemove.reverse()
-		#print newCardIndicesToRemove
-		#for index in newCardIndicesToRemove:
-		#	newCards.pop(index)
-
-		#oldCardsIndicesToRemove.sort()
-		#oldCardsIndicesToRemove.reverse()
-		#print oldCardsIndicesToRemove
-		#for index in oldCardsIndicesToRemove:
-		#	oldCards.pop(index)
 
 		tempDeck = self.deck.getCopy()
 		for card in newCards:
@@ -77,7 +57,9 @@ class Game:
 		if tempDeck.bustPropability(self.player) < RISK_TAKING_PROPENSITY:
 			decision = True
 
-		self.finishMove();
+		print "Propability to win: " + str(tempDeck.bustPropability(self.player)) + ", Taking risk until: " + str(RISK_TAKING_PROPENSITY) + ", Decision => " + str(decision)
+
+		self.resetGameState();
 
 		return decision
 
@@ -117,10 +99,8 @@ class Game:
 		frame = None
 		for cycle in range(numCycles):
 			frame = Camera.getFrame()
-
-			cv2.imshow("LatestFrame", frame)
 			cards = cd.getCards(frame)
-			
+
 			if(len(recognitionVector) > 0):
 				orderedCards = [None] * len(recognitionVector[0])
 				#sort the cards in the same 
@@ -133,7 +113,6 @@ class Game:
 				recognitionVector.append(orderedCards)
 			else:
 				recognitionVector.append(cards)
-
 		#count the card indices for each card
 		cardCounts = []
 		for i in range(len(recognitionVector[0])):
@@ -146,13 +125,18 @@ class Game:
 
 		#finally put together an array containing only the 
 		#max recognized values
-		finalCards = []
 
 		for cardNum, cardCount in enumerate(cardCounts):
 			maxValue = cardCount.index(max(cardCount))
 			recognitionVector[0][cardNum].value = Value.getValueFromIndex(maxValue)
 
+		result = "Recognized: "
+		for card in recognitionVector[0]:
+			result += str(card.value.value) + " / "
+		print result
+		
 		return recognitionVector[0], frame
+
 
 	@staticmethod
 	def divideOutCards(cards, player1, player2, threshold):

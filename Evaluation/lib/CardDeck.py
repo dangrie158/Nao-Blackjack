@@ -46,4 +46,5 @@ class CardDeck:
 			copy.addCard(card)
 			if copy.getHandValue() > 21:
 				cardsToGetBust += 1
+		#print "Cards to get bust are: " + str(cardsToGetBust) + " by cards in Deck: " + str(self.amount())
 		return cardsToGetBust / self.amount()

@@ -18,7 +18,8 @@ def getContours(im):
 	contours = sorted(contours, key=cv2.contourArea,reverse=True)[:MAX_NUMCARDS * 2]
 	return contours
 
-def getCards(frame, minArea=150):
+def getCards(frame, minArea=2500):
+
 	cards = []
 	#gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	gray = frame
@@ -26,6 +27,8 @@ def getCards(frame, minArea=150):
 	contours = getContours(edges)
 	for c in contours:
 		rect = hf.rectify(c)
+		# PRINT THE NEXT LINE TO ESTIMATE A GOOD AREA SIZE OF CARDS BY PUTTING ONE CARD INTO THE FOV
+		#print "Size of possible Contourobject: " + str(cv2.contourArea(c))
 		if rect is not None and cv2.contourArea(c) >= minArea:
 			cardImg = hf.imageRerverseProjection(rect, gray)
 			cardCandidate = Card(cardImg, rect)

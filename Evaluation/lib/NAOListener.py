@@ -20,14 +20,14 @@ class NAOTouchListener(ALModule):
         # Subscribe to TouchChanged event:
         global memory
         memory = ALProxy("ALMemory")
-        memory.subscribeToEvent("TouchChanged", "NAOTouchListener", "onTouched")
+        memory.subscribeToEvent("MiddleTactilTouched", "NAOTouchListener", "onTouched")
 
     def onTouched(self, strVarName, value):
         # Unsubscribe to the event when talking,
         # to avoid repetitions
         
         try:
-            memory.unsubscribeToEvent("TouchChanged", "NAOTouchListener")
+            memory.unsubscribeToEvent("MiddleTactilTouched", "NAOTouchListener")
         except:
             pass
 
@@ -36,7 +36,7 @@ class NAOTouchListener(ALModule):
 
         # Subscribe again to the event
         try:
-            memory.subscribeToEvent("TouchChanged", "NAOTouchListener", "onTouched")
+            memory.subscribeToEvent("MiddleTactilTouched", "NAOTouchListener", "onTouched")
         except:
             pass
 

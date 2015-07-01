@@ -12,7 +12,7 @@ VALUE_OFFSET = (5,5)
 
 TRAINSET = "trainingsset2"
 
-CurrentRecognitionEngine = BinaryRecognitionEngine(useValueOnly = False);
+CurrentRecognitionEngine = SIFTRecognitionEngine(useValueOnly = False);
 CurrentRecognitionEngine.train(TRAINSET)
 
 #the representation af a card. this is both,
