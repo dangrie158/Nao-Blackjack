@@ -86,6 +86,8 @@ class Game:
 			return self.player #we won, winner winner chicken dinner
 		elif playerHandValue > bankHandValue:
 			return self.player # close, but we won
+		elif playerHandValue == bankHandValue:
+			return None
 		else:
 			return self.bank # damn
 

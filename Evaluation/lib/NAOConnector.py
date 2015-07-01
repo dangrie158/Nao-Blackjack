@@ -33,23 +33,28 @@ def getWinMessage():
 
 def getLossMessage():
 	lossMessages = []
-	lossMessages.append("Damn I lost. A sad moment for every robot.");
-	lossMessages.append("I lost. I will send an army of robots as vendetta.");
-	lossMessages.append("I thought one plus one is three. You programmed me wrong.");
-	lossMessages.append("I hope my parents will still love me, even as a loser.");
+	lossMessages.append("Damn I lost. A sad moment for every robot.")
+	lossMessages.append("I lost. I will send an army of robots as vendetta.")
+	lossMessages.append("I thought one plus one is three. You programmed me wrong.")
+	lossMessages.append("I hope my parents will still love me, even as a loser.")
 	lossMessages.append("I did not lose, you just lost less then me.");
-	lossMessages.append("I think my win function can not return a zero.");
-	lossMessages.append("Time for the Bluescreen of Blackjack Games.");
+	lossMessages.append("I think my win function can not return a zero.")
+	lossMessages.append("Time for the Bluescreen of Blackjack Games.")
 	lossMessages.append("And these developers own a bachelor? Haha.")
 	return lossMessages[randint(0, len(lossMessages)-1)]
 
 def getWatchCardsMessage():
 	watchMessages = []
-	watchMessages.append("That looks interesting.");
-	watchMessages.append("Let my enormous brain calculate this.");
-	watchMessages.append("Really? These are game cards? ");
-	watchMessages.append("I like the green in the background.");
+	watchMessages.append("That looks interesting.")
+	watchMessages.append("Let my enormous brain calculate this.")
+	watchMessages.append("Really? These are game cards? ")
+	watchMessages.append("I like the green in the background.")
 	watchMessages.append("Why is everything in this picture gray?")
+	return watchMessages[randint(0, len(watchMessages)-1)]
+
+def getDrawMessage():
+	watchMessages = []
+	watchMessages.append("I did not win, but more important: you did not win. so I won. Robot logic for the win!")
 	return watchMessages[randint(0, len(watchMessages)-1)]
 
 	
@@ -143,6 +148,13 @@ class NAO():
 		if hasattr(self, 'behavior') and hasattr(self, 'speech'):
 			taskID = self.playBehavior("animations/Stand/Emotions/Negative/Disappointed_1", True)
 			self.sayMessage(getLossMessage())
+			self.behavior.wait(taskID, 0)
+			time.sleep(1)
+
+	def playDrawAnimation(self):
+		if hasattr(self, 'behavior') and hasattr(self, 'speech'):
+			taskID = self.playBehavior("animations/Stand/Emotions/Neutral/TODOTODO", True)
+			self.sayMessage(getDrawMessage())
 			self.behavior.wait(taskID, 0)
 			time.sleep(1)
 

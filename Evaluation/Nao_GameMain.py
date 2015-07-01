@@ -14,8 +14,12 @@ def decideWinner():
 	winner = game.getWinner()
 	if winner is nao:
 		NAO.playWinAnimation()
-	else:
+	elif winner is bank:
 		NAO.playLoseAnimation()
+	elif winner is None:
+		NAO.playDrawAnimation()
+	else:
+		raise ValueError('unexpected win value')
 	sleep(2)
 	NAO.sitdown()
 	game.newDeck()
