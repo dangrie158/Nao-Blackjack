@@ -19,6 +19,9 @@ class Game:
 	def newDeck(self):
 		self.deck = CardDeck()
 
+	#we call this function after every move, because
+	# our logic is state less and we always recognize all
+	# cards.
 	def resetGameState(self):
 		self.player.reset()
 		self.bank.reset()
@@ -38,6 +41,8 @@ class Game:
 		self.table.render()
 
 		playerNewValue = self.player.getHandValue()
+
+		#sanity checks to check if already someone has won
 		print "Player Hand Value is now: " + str(playerNewValue)
 		if playerNewValue > 21:
 			self.resetGameState();
@@ -54,15 +59,58 @@ class Game:
 
 		decision = False
 
-		if tempDeck.bustPropability(self.player) < RISK_TAKING_PROPENSITY:
+		confidence = tempDeck.bustPropability(self.player)
+		if confidence < RISK_TAKING_PROPENSITY:
 			decision = True
 
-		print "Propability to win: " + str(tempDeck.bustPropability(self.player)) + ", Taking risk until: " + str(RISK_TAKING_PROPENSITY) + ", Decision => " + str(decision)
+		print "made a decision with a confidence of " + str(confidence)
+
+
+		print "Propability to win: " + str(confidence) + ", Taking risk until: " + str(RISK_TAKING_PROPENSITY) + ", Decision => " + str(decision)
 
 		self.resetGameState();
 
 		return decision
 
+	def bankDoMove(self):
+		newCards, frame = Game.recognizeCards()
+
+		Camera.drawBoundingBoxes(frame, newCards)
+		Camera.drawCenteroids(frame, newCards)
+		Camera.drawCenter(frame)
+		cv2.imshow("LatestFrame", frame)
+
+		print "Recognized Cards: " + str(len(newCards))
+
+		centerY = frame.shape[0] / 2
+		#we have the bank as player 1 to net get confused by the names
+		Game.divideOutCards(newCards, self.bank, self.player, centerY)
+		self.table.render()
+
+		bankNewValue = self.bank.getHandValue()
+		playerNewValue = self.player.getHandValue()
+
+		#reset now because we have all data we need
+		self.resetGameState();
+
+		print "Player Hand Value is now: " + str(bankNewValue)
+
+
+		#sanity checks to check if already someone has won
+		if bankNewValue > 21:
+			print "Player has won, bank was over 21"
+			return self.player
+		elif playerNewValue == 21:
+			print "Player has won, he has a blackjack"
+			return self.player
+		elif bankNewValue == 21:
+			print "Bank has won, that was a Blackjack (=21)"
+			return self.bank
+
+		if bankHandValue < 17:
+			return True
+		else:
+			return False;
 
 	def getWinner(self):
 		cards, frame = Game.recognizeCards()
