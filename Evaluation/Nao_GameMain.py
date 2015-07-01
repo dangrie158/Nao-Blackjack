@@ -22,7 +22,6 @@ def decideWinner():
 		raise ValueError('unexpected win value')
 	sleep(2)
 	NAO.sitdown()
-	game.newDeck()
 	game.resetGameState()
 	NAO.sayMessage("Time for another round.")
 
@@ -68,10 +67,8 @@ if __name__ == '__main__':
 						NAO.playWinAnimation()
 					else:
 						NAO.playLoseAnimation()
-					game.newDeck()
 					NAO.sitdown()
 					sleep(2)
-					game.newDeck()
 					game.resetGameState()
 					NAO.sayMessage("Time for another round.")
 			NAO.untouch()
@@ -79,3 +76,5 @@ if __name__ == '__main__':
 		#print game.getWinner()
 		if cv2.waitKey(20) & 0xFF == ord('q'):
 			break
+		if cv2.waitKey(20) & 0xFF == ord('n'):
+			game.newDeck()
