@@ -32,8 +32,8 @@ if __name__ == '__main__':
 	NAOTouchListener.setConnector(NAO)
 	naoInitialized = NAO.setup()
 	if naoInitialized == True:
-		NAO.sayMessage("Hello stupid human being!")
-		NAO.sayMessage("Push my huge head to start a game!")
+		NAO.sayMessage("Lets play some Blackjack")
+		NAO.sayMessage("Push my head to start a game!")
 		NAO.subscribeToCamera()
 		NAO.untouch()
 
@@ -52,7 +52,7 @@ if __name__ == '__main__':
 				decideForWinner = False
 			else:
 				NAO.playDecideAnimation()
-				decision = game.playerDoMove()
+				decision = game.playerDoFastMove()
 				if decision == True:
 					NAO.sayMessage("I want another card")
 					NAO.sitdown()
@@ -78,3 +78,4 @@ if __name__ == '__main__':
 			break
 		if cv2.waitKey(20) & 0xFF == ord('n'):
 			game.newDeck()
+			print "shuffled a new deck"

@@ -67,5 +67,8 @@ class VirtualTable:
 		cv2.line(frame, (0, dividerY), (int(frameWidth), dividerY), (255, 255, 255))
 		self.renderCards(frame, self.player2.cards, (0, player1heightOnTable + playerMargin), margin, cardWidth, cardHeight)
 		
+		cv2.startWindowThread()
+		cv2.namedWindow(self.title)
 		cv2.imshow(self.title, frame)
+		cv2.waitKey(1)
 		frame.fill(0)

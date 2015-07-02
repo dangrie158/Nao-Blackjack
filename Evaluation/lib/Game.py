@@ -7,6 +7,7 @@ import cv2
 import Camera
 
 RISK_TAKING_PROPENSITY = 0.5
+DEFAULT_RECOGNITION_CYCLES = 5
 
 class Game:
 	def __init__(self, player, bank):
@@ -28,11 +29,6 @@ class Game:
 
 	def playerDoMove(self):
 		newCards, frame = Game.recognizeCards()
-
-		Camera.drawBoundingBoxes(frame, newCards)
-		Camera.drawCenteroids(frame, newCards)
-		Camera.drawCenter(frame)
-		cv2.imshow("LatestFrame", frame)
 
 		print "Recognized Cards: " + str(len(newCards))
 
@@ -75,11 +71,6 @@ class Game:
 	def bankDoMove(self):
 		newCards, frame = Game.recognizeCards()
 
-		Camera.drawBoundingBoxes(frame, newCards)
-		Camera.drawCenteroids(frame, newCards)
-		Camera.drawCenter(frame)
-		cv2.imshow("LatestFrame", frame)
-
 		print "Recognized Cards: " + str(len(newCards))
 
 		centerY = frame.shape[0] / 2
@@ -110,7 +101,7 @@ class Game:
 		if bankHandValue < 17:
 			return True
 		else:
-			return False;
+			return False
 
 	def getWinner(self):
 		cards, frame = Game.recognizeCards()
@@ -139,12 +130,15 @@ class Game:
 		else:
 			return self.bank # damn
 
-	def bankDoFastMove(self, numCycles = 10):
+	def bankDoFastMove(self, numCycles = DEFAULT_RECOGNITION_CYCLES):
 		trueDecicions = 0
 		falseDecicions = 0
+		bustCount = 0
+		playerBlackjackCount = 0
+		bankBlackjackCount = 0
 
 		for i in range(numCycles):
-			newCards, frame = Game.recognizeCards()
+			newCards, frame = Game.getCards()
 
 			print "Recognized Cards: " + str(len(newCards))
 
@@ -164,29 +158,39 @@ class Game:
 
 			#sanity checks to check if already someone has won
 			if bankNewValue > 21:
-				print "Player has won, bank was over 21"
-				return self.player
+				bustCount += 1
 			elif playerNewValue == 21:
-				print "Player has won, he has a blackjack"
-				return self.player
+				playerBlackjackCount += 1
 			elif bankNewValue == 21:
-				print "Bank has won, that was a Blackjack (=21)"
-				return self.bank
+				bankBlackjackCount += 1
 
 			if bankHandValue < 17:
 				trueDecicions += 1
 			else:
 				falseDecisions += 1
 
+		#sanity checks to check if already someone has won
+		if bustCount > (numCycles / 2):
+			print "Player has won, bank was over 21"
+			return self.player
+		elif playerBlackjackCount > (numCycles / 2):
+			print "Player has won, he has a blackjack"
+			return self.player
+		elif bankBlackjackCount > (numCycles / 2):
+			print "Bank has won, that was a Blackjack (=21)"
+			return self.bank
+		
 		if trueDecicions >= falseDecisions:
 			return True
 		else:
 			return False
 
-	def playerDoFastMove(self, numCycles = 10):
+	def playerDoFastMove(self, numCycles = DEFAULT_RECOGNITION_CYCLES):
 		confidence = 0
+		blackjackCount = 0
+		bustCount = 0
 		for i in range(numCycles):
-			newCards, frame = Game.recognizeCards()
+			newCards, frame = Game.getCards()
 
 			print "Recognized Cards: " + str(len(newCards))
 
@@ -199,19 +203,23 @@ class Game:
 			#sanity checks to check if already someone has won
 			print "Player Hand Value is now: " + str(playerNewValue)
 			if playerNewValue > 21:
-				self.resetGameState();
-				print "Bank has won, player was over 21"
-				return self.bank
+				bustCount += 1
 			elif playerNewValue == 21:
-				self.resetGameState();
-				print "Player has won, that was a Blackjack (=21)"
-				return self.player
+				blackjackCount += 1 
 
 			tempDeck = self.deck.getCopy()
 			for card in newCards:
 				tempDeck.pick(card.value)
 
 			confidence += tempDeck.bustPropability(self.player)
+			self.resetGameState();
+
+		if bustCount > (numCycles / 2):
+			print "Bank has won, player was over 21"
+			return self.bank
+		elif blackjackCount > (numCycles / 2):
+			print "Player has won, that was a Blackjack (=21)"
+			return self.player
 
 		decision = False
 		confidence /= numCycles
@@ -230,15 +238,16 @@ class Game:
 	def getCards():
 		frame = Camera.getFrame()
 		cards = cd.getCards(frame)
-		Camera.drawBoundingBoxes(frame, cards)
-		Camera.drawCenteroids(frame, cards)
-		Camera.drawCenter(frame)
-		Camera.showImage(frame)
-		return cards
+		drawingCopy = Camera.toRGB(frame)
+		Camera.drawBoundingBoxes(drawingCopy, cards)
+		Camera.drawCenteroids(drawingCopy, cards)
+		Camera.drawCenter(drawingCopy)
+		Camera.showImage(drawingCopy)
+		return cards, frame
 
 
 	@staticmethod
-	def recognizeCards(numCycles = 10):
+	def recognizeCards(numCycles = DEFAULT_RECOGNITION_CYCLES):
 		recognitionVector = []
 
 		#this is a 2 step process, first capture 10 frames
@@ -248,6 +257,11 @@ class Game:
 		for cycle in range(numCycles):
 			frame = Camera.getFrame()
 			cards = cd.getCards(frame)
+			drawingCopy = Camera.toRGB(frame)
+			Camera.drawBoundingBoxes(drawingCopy, cards)
+			Camera.drawCenteroids(drawingCopy, cards)
+			Camera.drawCenter(drawingCopy)
+			Camera.showImage(drawingCopy)
 
 			if(len(recognitionVector) > 0):
 				orderedCards = [None] * len(recognitionVector[0])

@@ -86,7 +86,7 @@ class NAO():
 			print "NAO Error: ", e
 	
 		try:
-			self., self.IP, self.PORT)
+			self.posture = ALProxy('ALRobotPosture', self.IP, self.PORT)
 		except Exception, e:
 			print "Could not create Connection to NAO Posture"
 			print "NAO Error: ", e
@@ -153,7 +153,7 @@ class NAO():
 
 	def playDrawAnimation(self):
 		if hasattr(self, 'behavior') and hasattr(self, 'speech'):
-			taskID = self.playBehavior("animations/Stand/Emotions/Neutral/TODOTODO", True)
+			taskID = self.playBehavior("animations/Stand/Emotions/Neutral/Confused_1", True)
 			self.sayMessage(getDrawMessage())
 			self.behavior.wait(taskID, 0)
 			time.sleep(1)

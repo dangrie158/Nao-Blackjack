@@ -216,7 +216,10 @@ class BinaryRecognitionEngine(RecognitionEngine):
 		diff = cv2.absdiff(imageData,bestMatch.imageData)  
 		diff = cv2.GaussianBlur(diff,(5,5),5)    
 		flag, diff = cv2.threshold(diff, 200, 255, cv2.THRESH_BINARY)
-		cv2.imshow("diffimage", diff)
+		cv2.startWindowThread()
+		cv2.namedWindow("Difference Image")
+		cv2.imshow("Difference Image", diff)
+		cv2.waitKey(1)
 
 		card.value = bestMatch.value
 		return True

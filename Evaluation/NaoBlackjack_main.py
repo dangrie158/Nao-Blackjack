@@ -87,7 +87,11 @@ if __name__ == '__main__':
 			drawBoundingBoxes(frame, cards)
 			drawCenteroids(frame, cards)
 			drawCenter(frame)
+
+			cv2.startWindowThread()
+			cv2.namedWindow("Capture")
 			cv2.imshow("Capture", frame)
+			cv2.waitKey(1)
 	
 			player1.reset()
 			player2.reset()
@@ -111,7 +115,10 @@ if __name__ == '__main__':
 				drawCenteroids(NAOImage, cards)
 				drawCenter(NAOImage)
 				
+				cv2.startWindowThread()
+				cv2.namedWindow("Capture")
 				cv2.imshow("Capture", NAOImage)
+				cv2.waitKey(1)
 
 				player1.reset()
 				player2.reset()

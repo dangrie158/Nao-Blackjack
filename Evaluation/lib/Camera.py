@@ -8,6 +8,10 @@ if useNAO:
 else:
 	captureDevice = cv2.VideoCapture(0)
 
+#convert a gray picture back to RGB channels
+def toRGB(frame):
+	return cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
+
 def drawBoundingBoxes(frame, cards):
 	for card in cards:
 		p1, p2 = card.getBoundingBox()
@@ -37,5 +41,8 @@ def getFrame():
 	return frame
 
 def showImage(frame):
+	print "show image"
+	cv2.startWindowThread()
+	cv2.namedWindow("LatestFrame")
 	cv2.imshow("LatestFrame", frame)
 	cv2.waitKey(1)
