@@ -86,7 +86,7 @@ class NAO():
 			print "NAO Error: ", e
 	
 		try:
-			self.posture = ALProxy('ALRobotPosture', self.IP, self.PORT)
+			self., self.IP, self.PORT)
 		except Exception, e:
 			print "Could not create Connection to NAO Posture"
 			print "NAO Error: ", e

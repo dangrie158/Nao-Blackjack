@@ -35,3 +35,7 @@ def getFrame():
 		ret, frame = captureDevice.read()
 		frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	return frame
+
+def showImage(frame):
+	cv2.imshow("LatestFrame", frame)
+	cv2.waitKey(1)

@@ -139,6 +139,104 @@ class Game:
 		else:
 			return self.bank # damn
 
+	def bankDoFastMove(self, numCycles = 10):
+		trueDecicions = 0
+		falseDecicions = 0
+
+		for i in range(numCycles):
+			newCards, frame = Game.recognizeCards()
+
+			print "Recognized Cards: " + str(len(newCards))
+
+			centerY = frame.shape[0] / 2
+			#we have the bank as player 1 to net get confused by the names
+			Game.divideOutCards(newCards, self.bank, self.player, centerY)
+			self.table.render()
+
+			bankNewValue = self.bank.getHandValue()
+			playerNewValue = self.player.getHandValue()
+
+			#reset now because we have all data we need
+			self.resetGameState();
+
+			print "Player Hand Value is now: " + str(bankNewValue)
+
+
+			#sanity checks to check if already someone has won
+			if bankNewValue > 21:
+				print "Player has won, bank was over 21"
+				return self.player
+			elif playerNewValue == 21:
+				print "Player has won, he has a blackjack"
+				return self.player
+			elif bankNewValue == 21:
+				print "Bank has won, that was a Blackjack (=21)"
+				return self.bank
+
+			if bankHandValue < 17:
+				trueDecicions += 1
+			else:
+				falseDecisions += 1
+
+		if trueDecicions >= falseDecisions:
+			return True
+		else:
+			return False
+
+	def playerDoFastMove(self, numCycles = 10):
+		confidence = 0
+		for i in range(numCycles):
+			newCards, frame = Game.recognizeCards()
+
+			print "Recognized Cards: " + str(len(newCards))
+
+			centerY = frame.shape[0] / 2
+			Game.divideOutCards(newCards, self.player, self.bank, centerY)
+			self.table.render()
+
+			playerNewValue = self.player.getHandValue()
+
+			#sanity checks to check if already someone has won
+			print "Player Hand Value is now: " + str(playerNewValue)
+			if playerNewValue > 21:
+				self.resetGameState();
+				print "Bank has won, player was over 21"
+				return self.bank
+			elif playerNewValue == 21:
+				self.resetGameState();
+				print "Player has won, that was a Blackjack (=21)"
+				return self.player
+
+			tempDeck = self.deck.getCopy()
+			for card in newCards:
+				tempDeck.pick(card.value)
+
+			confidence += tempDeck.bustPropability(self.player)
+
+		decision = False
+		confidence /= numCycles
+		if confidence < RISK_TAKING_PROPENSITY:
+			decision = True
+
+		print "made a decision with a confidence of " + str(confidence)
+
+		print "Propability to win: " + str(confidence) + ", Taking risk until: " + str(RISK_TAKING_PROPENSITY) + ", Decision => " + str(decision)
+
+		self.resetGameState();
+
+		return decision
+
+	@staticmethod
+	def getCards():
+		frame = Camera.getFrame()
+		cards = cd.getCards(frame)
+		Camera.drawBoundingBoxes(frame, cards)
+		Camera.drawCenteroids(frame, cards)
+		Camera.drawCenter(frame)
+		Camera.showImage(frame)
+		return cards
+
+
 	@staticmethod
 	def recognizeCards(numCycles = 10):
 		recognitionVector = []
